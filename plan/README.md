@@ -2,7 +2,7 @@
 
 > 仓库建议名：`health-assessment-funnel`
 > 规划基线日期：2026-09-21（Asia/Shanghai）
-> 当前阶段：仅规划与环境审计；尚未修改 Supabase 远端 Schema，尚未开始实现
+> 当前阶段：规划完成并经首轮独立审查；GitHub/Next.js 基线已建立，Supabase 远端 Schema 尚未修改
 
 ## 目标
 
@@ -58,7 +58,7 @@
 4. 数据边界、session 策略、`/pay` demo 语义冻结。
 5. 本地 Docker 可用，或明确备用的集成测试数据库方案。
 
-当前第 2、5 项仍是实现阶段的外部 Go/No-Go 条件：GitHub 凭证失效且 Docker daemon 未启动。规划文档可以本地提交，但在恢复远端 push 和真实测试数据库前，不宣称实现链路可交付。
+GitHub private repository 与 Docker 已在 2026-09-21 后续 preflight 中恢复；Vercel team 可见。真实测试数据库、远端 migration 和完整 CI 仍须按计划产生证据后才能宣称交付。
 
 ## 事实与假设
 

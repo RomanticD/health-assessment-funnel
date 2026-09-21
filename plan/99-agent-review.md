@@ -95,3 +95,7 @@ P1：ACL/default privileges 要到可执行级；函数空 search path/全限定
 **功能实现：No-Go until external preflight。** 必须先让 `RomanticD` 能创建/push private repo，并让 Vercel target 可见；Docker/local Supabase 需在进入集中测试前可用。Supabase 与 Playwright connector 已通过只读可用性检查。
 
 第二轮独立复审在 agent quota 恢复后应再次运行；即使未运行，也不能降低上述外部 Go/No-Go 条件或测试门槛。
+
+## Post-review preflight update
+
+用户完成授权后，GitHub CLI OAuth 已成功，private `RomanticD/health-assessment-funnel` 已创建并推送；Docker 24.0.6 与 Vercel team `romanticds-projects` 也已确认。原 review 的外部阻塞记录保留为审计历史，不再代表当前 GitHub/Docker 状态。

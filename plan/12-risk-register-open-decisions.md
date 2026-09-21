@@ -5,8 +5,8 @@
 | ID | 风险 | 概率/影响 | 预防与应对 | Owner/截止 |
 |---|---|---|---|---|
 | K01 | 题面 2 天/3 天矛盾导致范围失控 | 高/高 | 以 2 天为硬截止，冻结非核心范围 | 开工前 |
-| K02 | GitHub 无法 push | 已发生/高 | 恢复 `RomanticD` gh auth 或安装 GitHub App；先本地原子 commit | plan 完成后 |
-| K03 | Docker daemon 未启动，集成测试跑不起来 | 已发生/高 | 启动 Docker；CI 作为独立可重现环境；不连生产测试 | Day 1 早期 |
+| K02 | GitHub 无法 push | 已解决/高 | CLI OAuth 已恢复，private repo 已创建并完成首推 | resolved |
+| K03 | Docker daemon 未启动，集成测试跑不起来 | 已解决/高 | Docker 24.0.6 已验证；仍须 local Supabase reset 证明 | implementation |
 | K04 | Supabase CLI 未安装/版本漂移 | 已发生/中 | 固定 devDependency + lockfile，所有命令先 `--help` | scaffold |
 | K05 | 当前 public 默认 ACL 过宽 | 高/高 | 首 migration revoke defaults + RLS + 权限测试 | 首 migration |
 | K06 | server secret 泄露到客户端/日志 | 低/严重 | server-only env、secret scan、bundle grep、日志脱敏 | 持续 |
@@ -32,17 +32,15 @@
 - 本地 Git 已以 `main` 初始化。
 - 仓库名由实现内容决定，建议 `health-assessment-funnel`。
 
-## 需要用户协助的外部阻塞
+## 外部配置状态
 
 ### 1. GitHub 认证
 
-现状：`gh auth status` 显示 `RomanticD` token 失效；GitHub connector 的 App 未安装到 `RomanticD`。
-需要：用户重新执行 `gh auth login -h github.com`，或把 GitHub App 安装/授权到 `RomanticD`。
-在此之前：可以本地 commit，但不能履行“关键更改立即 push”。
+已解决：`gh auth login` 成功，`RomanticD/health-assessment-funnel` private repository 已创建，`main` 跟踪 `origin/main`。
 
 ### 2. Vercel 目标
 
-需要在部署前确定目标账号/团队并完成 CLI/集成认证。规划和本地实现不被阻塞。
+Vercel team `romanticds-projects` 已可见；deploy connector action 不可用，CLI 登录端点失败，因此改用已登录 Dashboard 从 GitHub 导入，再记录 project linkage。
 
 ### 3. 最终姓名
 

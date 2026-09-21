@@ -16,13 +16,13 @@
 
 这与常见“边写边测”不同，风险是缺陷更晚暴露；缓解手段是 API/DB/算法 oracle 先写入 plan/OpenAPI，模块保持纯函数和 dependency injection，且为集中测试阶段保留不可挪用时间。
 
-当前外部事实：
+初始外部事实及后续状态：
 
-1. GitHub connector 能识别 `RomanticD` profile，但 App 未安装到该账号，且 connector 没有 create-repository 动作；本地 `gh` token 仍失效。因此无法按要求创建 `RomanticD/health-assessment-funnel` 私有库并首次 push。
-2. Vercel connector 当前返回 0 teams，尚不能选择部署目标。
-3. Supabase connector 可正常访问 `kfyqgzuatywmsuruwsei`；Docker daemon 尚未运行，local integration test 栈不可用。
+1. GitHub 已通过 CLI OAuth 恢复，`RomanticD/health-assessment-funnel` private repository 已创建并首推。
+2. Vercel team `romanticds-projects` 已可见；项目仍待从 GitHub 导入并获得公开 URL。
+3. Supabase connector 可正常访问 `kfyqgzuatywmsuruwsei`；Docker 24.0.6 已可用，local Supabase reset 尚待 migration 阶段验证。
 
-规划可以完成并本地 commit；正式功能编码按用户要求应在 GitHub 首次 push 后开始，因此上述 GitHub blocker 是当前实现 Go/No-Go。
+GitHub Go/No-Go 已清除，功能编码可以开始；Vercel linkage 与 local Supabase 是当前 bootstrap 后续检查点。
 
 ## Must / Stretch
 
