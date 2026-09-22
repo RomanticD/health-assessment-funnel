@@ -3,7 +3,14 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { activateDemoAccess, getAssessmentResult, isHealthApiError } from '@/client/health-api'
+import {
+  activateDemoAccess,
+  getAssessmentResult,
+  getFunnel,
+  isHealthApiError,
+} from '@/client/health-api'
+import type { FunnelAnswers } from '@/shared/contracts/funnel'
+import { answerLabel } from '@/components/quiz/questions'
 import { SiteHeader } from '@/components/site-header'
 import { UpgradeDialog } from '@/components/results/upgrade-dialog'
 import type {
@@ -24,16 +31,16 @@ const BMI_LABELS: Record<BmiCategory, string> = {
 
 const WARNING_LABELS: Record<HealthWarningCode, string> = {
   PROFESSIONAL_GUIDANCE_RECOMMENDED:
-    'This input set falls outside the demo’s calorie safety envelope. A qualified professional can provide a more appropriate individual estimate.',
+    'Your needs deserve a more individual approach. A qualified clinician or dietitian can help you choose a suitable energy target.',
   PREDICTION_HORIZON_EXCEEDED:
-    'The estimated timeline extends beyond the model’s 104-week horizon, so no arrival date or curve is shown.',
+    'This goal calls for a longer-term approach. Focus on small milestones and review your progress over time.',
   MAINTENANCE_GOAL_NO_ARRIVAL_DATE:
     'Maintenance goals do not have an arrival date; the estimate focuses on sustaining a range.',
 }
 
 function resultErrorMessage(error: unknown): string {
   if (!isHealthApiError(error)) {
-    return error instanceof Error ? error.message : 'The result could not be loaded.'
+    return 'We couldn’t load your summary. Please try again.'
   }
   if (error.code === 'SESSION_REQUIRED' || error.code === 'SESSION_EXPIRED') {
     return 'This result belongs to a private session that is no longer available in this browser.'
@@ -41,11 +48,12 @@ function resultErrorMessage(error: unknown): string {
   if (error.code === 'ASSESSMENT_NOT_FOUND') {
     return 'This assessment was not found for the current private session.'
   }
-  return error.message
+  return 'We couldn’t load your summary. Please try again.'
 }
 
 export function ResultExperience({ assessmentId }: { assessmentId: string }) {
   const [result, setResult] = useState<ResultAccessData | null>(null)
+  const [preferences, setPreferences] = useState<FunnelAnswers | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -61,6 +69,8 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
     try {
       const response = await getAssessmentResult(assessmentId)
       setResult(response.data)
+      const funnel = await getFunnel(assessmentId)
+      setPreferences(funnel.data.answers)
     } catch (error) {
       setLoadError(resultErrorMessage(error))
     } finally {
@@ -103,9 +113,8 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
         <SiteHeader compact />
         <section className="center-state" aria-live="polite">
           <span className="loading-ring" aria-hidden="true" />
-          <p className="eyebrow">Server-calculated snapshot</p>
-          <h1>Loading your saved result…</h1>
-          <p>Access is checked live; the browser does not decide which fields you can see.</p>
+          <p className="eyebrow">A little time for you</p>
+          <h1>Your summary is on its way…</h1>
         </section>
       </main>
     )
@@ -118,7 +127,7 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
         <section className="center-state">
           <p className="eyebrow">Result unavailable</p>
           <h1>We could not open this snapshot.</h1>
-          <p>{loadError ?? 'The server did not return a result.'}</p>
+          <p>{loadError ?? 'We couldn’t load your summary. Please try again.'}</p>
           <div className="button-row button-row--centered">
             <button className="primary-action" type="button" onClick={() => void loadResult()}>
               Try again
@@ -140,21 +149,20 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
           <p className="eyebrow">Your wellness snapshot</p>
           <h1>
             {result.access === 'full'
-              ? 'The full picture, with its limits.'
-              : 'A useful first look—not a verdict.'}
+              ? 'Your next chapter starts here.'
+              : 'Your personal starting point.'}
           </h1>
-          <p>
-            Built from the answers you confirmed and calculated on the server with the versioned
-            health-v1 model.
-          </p>
+          <p>Small steps, chosen around your goals and everyday life.</p>
           <span
             className={
               result.access === 'full' ? 'access-badge access-badge--full' : 'access-badge'
             }
           >
-            {result.access === 'full' ? 'Full demo access active' : 'Free preview'}
+            {result.access === 'full' ? 'Your full summary' : 'Your first look'}
           </span>
         </header>
+
+        {preferences?.experience && <RoutineSummary answers={preferences} />}
 
         <section className="result-overview" aria-label="BMI overview">
           <div className="bmi-orbit" aria-hidden="true">
@@ -165,8 +173,8 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
             <p className="metric-label">BMI reference category</p>
             <h2>{BMI_LABELS[result.bmiCategory]}</h2>
             <p>
-              BMI is a broad screening ratio, not a diagnosis. It does not distinguish muscle, fat
-              distribution, pregnancy, or individual clinical context.
+              One part of your starting point. Your energy, strength, and everyday wellbeing matter
+              too.
             </p>
           </div>
         </section>
@@ -181,6 +189,8 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
       </div>
 
       <UpgradeDialog
+        hasEstimate={result.calorieRange !== null}
+        hasTimeline={result.warnings.length === 0 && result.calorieRange !== null}
         open={isDialogOpen}
         isPaying={isPaying}
         error={paymentError}
@@ -196,7 +206,7 @@ function PreviewResult({ result, onUnlock }: { result: PreviewResultData; onUnlo
     <>
       <section className="preview-grid" aria-label="Free result preview">
         <article className="metric-card metric-card--accent">
-          <p className="metric-label">Educational calorie range</p>
+          <p className="metric-label">Your daily energy guide</p>
           {result.calorieRange === null ? (
             <strong>Individual guidance recommended</strong>
           ) : (
@@ -205,16 +215,14 @@ function PreviewResult({ result, onUnlock }: { result: PreviewResultData; onUnlo
               <small> kcal / day</small>
             </strong>
           )}
-          <p>
-            {result.summary} This range is intentionally broader than the protected exact estimate.
-          </p>
+          <p>A starting range to support your chosen goal and everyday activity.</p>
         </article>
         <article className="metric-card">
-          <p className="metric-label">What this preview tells you</p>
+          <p className="metric-label">A sustainable pace</p>
           <h2>Gradual beats dramatic.</h2>
           <p>
-            The model caps weekly change and refuses to invent an exact prediction outside its
-            safety envelope.
+            Give yourself room to build a routine you enjoy. Small, repeatable changes can fit more
+            naturally into everyday life.
           </p>
         </article>
       </section>
@@ -228,22 +236,29 @@ function PreviewResult({ result, onUnlock }: { result: PreviewResultData; onUnlo
               <path d="M9.5 12V8.75a4.5 4.5 0 0 1 9 0V12M7 12h14v11H7z" />
             </svg>
           </div>
-          <p className="eyebrow">Protected detail</p>
-          <h2 id="locked-title">Understand how the estimate was built.</h2>
+          <p className="eyebrow">Your next step</p>
+          <h2 id="locked-title">See where your next chapter could take you.</h2>
           <p>
-            The API has not sent the exact calories, BMR, TDEE, target date, or projection to this
-            page. Demo access changes the server entitlement, then fetches a different response.
+            {result.calorieRange === null
+              ? 'Explore your daily energy overview alongside your personal movement suggestions. A calorie target and timeline aren’t available for this assessment.'
+              : result.warnings.length > 0
+                ? 'Explore your personal energy guide. A target-date prediction isn’t available for this goal.'
+                : 'Explore your personal energy target and estimated progress, all in one place.'}
           </p>
           <button className="primary-action" type="button" onClick={onUnlock}>
-            Unlock full demo result
+            Explore my full summary
             <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
               <path d="m7.5 4.5 5 5-5 5" />
             </svg>
           </button>
-          <small>No real payment, card, or renewal.</small>
         </div>
         <div className="locked-stack" aria-label="Locked result sections">
-          {['Energy calculation', 'Target-date estimate', 'Weekly projection'].map((label) => (
+          {(result.calorieRange === null
+            ? ['Your energy at rest', 'Your daily energy overview']
+            : result.warnings.length > 0
+              ? ['Your daily energy target', 'Your daily energy overview']
+              : ['Your daily energy target', 'Your estimated timeline', 'Your progress outlook']
+          ).map((label) => (
             <div key={label}>
               <span>{label}</span>
               <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -262,7 +277,7 @@ function FullResult({ result }: { result: FullResultData }) {
     <>
       <section className="full-metrics" aria-label="Full energy estimate">
         <MetricCard
-          label="Basal energy estimate"
+          label="Energy at rest"
           value={result.bmrKcal.toLocaleString()}
           unit="kcal / day"
         />
@@ -272,7 +287,7 @@ function FullResult({ result }: { result: FullResultData }) {
           unit="kcal / day"
         />
         <MetricCard
-          label="Goal-aligned estimate"
+          label="Your daily energy target"
           value={result.exactDailyCalories?.toLocaleString() ?? 'Unavailable'}
           unit={result.exactDailyCalories === null ? 'See guidance below' : 'kcal / day'}
           featured
@@ -285,16 +300,17 @@ function FullResult({ result }: { result: FullResultData }) {
             <p className="eyebrow">Estimated direction</p>
             <h2 id="timeline-title">
               {result.targetDate === null
-                ? 'Maintain a steady range.'
+                ? result.warnings.includes('MAINTENANCE_GOAL_NO_ARRIVAL_DATE')
+                  ? 'Maintain a steady range.'
+                  : 'Take a longer-term view.'
                 : `An estimated target date of ${formatDate(result.targetDate)}.`}
             </h2>
             <p>
-              This is a mathematical projection, not a promise. Real progress varies with adherence,
-              adaptation, health, sleep, medication, and many other factors.
+              Think of this as a direction to work toward. Your pace may change, and that is okay.
             </p>
             {result.calorieRange !== null && (
               <p className="range-note">
-                Preview range: {result.calorieRange.min.toLocaleString()}–
+                Daily guide: {result.calorieRange.min.toLocaleString()}–
                 {result.calorieRange.max.toLocaleString()} kcal/day
               </p>
             )}
@@ -302,42 +318,25 @@ function FullResult({ result }: { result: FullResultData }) {
           {result.weightProjection.length > 1 ? (
             <ProjectionChart points={result.weightProjection} />
           ) : (
-            <div className="chart-empty">No arrival curve is needed for this goal.</div>
+            <div className="chart-empty">
+              {result.warnings.includes('MAINTENANCE_GOAL_NO_ARRIVAL_DATE')
+                ? 'Your goal is to maintain a comfortable range.'
+                : 'Start with small milestones and review your progress over time.'}
+            </div>
           )}
         </section>
       ) : (
         <section className="guidance-panel" aria-labelledby="guidance-title">
-          <p className="eyebrow">Model boundary reached</p>
-          <h2 id="guidance-title">An exact calorie or date estimate would be misleading here.</h2>
+          <p className="eyebrow">A more personal approach</p>
+          <h2 id="guidance-title">Let’s find the right support for your goal.</h2>
           <p>
-            The server deliberately returned no exact calorie target, target date, or curve.
-            Consider discussing the goal with a qualified clinician or dietitian.
+            A qualified clinician or dietitian can help you choose an energy target that fits your
+            individual needs.
           </p>
         </section>
       )}
 
       <Warnings warnings={result.warnings} />
-
-      <section className="method-note">
-        <div>
-          <p className="metric-label">Calculation provenance</p>
-          <h2>Versioned and reproducible</h2>
-        </div>
-        <dl>
-          <div>
-            <dt>Algorithm</dt>
-            <dd>{result.algorithmVersion}</dd>
-          </div>
-          <div>
-            <dt>Formula</dt>
-            <dd>Mifflin–St Jeor + activity factor</dd>
-          </div>
-          <div>
-            <dt>Rounding</dt>
-            <dd>Decimal half-up</dd>
-          </div>
-        </dl>
-      </section>
     </>
   )
 }
@@ -447,17 +446,74 @@ function EducationalFooter() {
   return (
     <footer className="result-footer">
       <div>
-        <p className="eyebrow">Keep the context</p>
-        <h2>Use this as a conversation starter.</h2>
+        <p className="eyebrow">A note about your summary</p>
         <p>
-          This demo cannot account for medical history, body composition, pregnancy, eating-disorder
-          risk, medication, disability, or personal nutritional needs.
+          These are general wellness estimates, not medical advice or guaranteed results. Your
+          individual needs may differ. BMI alone does not measure your health.
         </p>
       </div>
       <Link className="secondary-action" href="/">
         Return to the start
       </Link>
     </footer>
+  )
+}
+
+function RoutineSummary({ answers }: { answers: FunnelAnswers }) {
+  return (
+    <section className="routine-card">
+      <p className="eyebrow">YOUR EVERYDAY MOVEMENT</p>
+      <h2>A little space for what matters to you.</h2>
+      <div className="routine-tags">
+        {(['experience', 'minutes', 'days', 'equipment'] as const).map(
+          (key) => answers[key] && <span key={key}>{answerLabel(key, answers[key])}</span>,
+        )}
+      </div>
+      <p>Your focus: {answerLabel('motivation', answers.motivation)}.</p>
+      <ul>
+        <li>
+          {answers.experience === 'new'
+            ? 'Begin with a gentle introduction to breathing, posture, and controlled movement.'
+            : answers.experience === 'some'
+              ? 'Revisit familiar basics before adding more challenging movements.'
+              : 'Keep a mix of familiar practice and recovery in your weekly routine.'}
+        </li>
+        <li>
+          Set aside {answers.minutes} minutes on {answers.days} days each week.{' '}
+          {answers.equipment === 'none'
+            ? 'Choose a comfortable, non-slip space; a supportive mat can help with floor work.'
+            : answers.equipment === 'bands'
+              ? 'Start with your mat; add light resistance only when movement feels comfortable.'
+              : 'Keep your mat somewhere easy to reach as a reminder to begin.'}
+        </li>
+        <li>
+          {answers.sitting === 'mostly'
+            ? 'Break up long periods of sitting with short, comfortable movement breaks.'
+            : answers.sitting === 'some'
+              ? 'Use a short movement break to add variety to your day.'
+              : 'Balance your active day with a gentle cooldown and rest.'}
+        </li>
+        <li>
+          {answers.focus?.includes('whole_body')
+            ? 'Explore a balanced mix of whole-body movements.'
+            : `Build your practice around ${answerLabel('focus', answers.focus).toLowerCase()}, alongside balanced movement.`}
+        </li>
+        {answers.barriers?.includes('time') && (
+          <li>
+            Pair your practice with a daily cue, such as finishing work, to make time easier to
+            find.
+          </li>
+        )}
+        {answers.barriers?.includes('consistency') && (
+          <li>
+            Put your chosen days in your calendar. Missing one day does not mean starting over.
+          </li>
+        )}
+        {answers.barriers?.includes('confidence') && (
+          <li>Look for beginner instruction and take time to learn each movement comfortably.</li>
+        )}
+      </ul>
+    </section>
   )
 }
 

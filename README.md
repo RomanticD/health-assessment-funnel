@@ -17,7 +17,7 @@
 ```text
 Landing
   → 创建/恢复匿名 session
-  → 性别 → 目标 → 身体数据 → 活动频率
+  → 15 个逐题保存的问题（目标、经验、习惯、偏好、身体数据）
   → review + 服务端计算
   → preview（无敏感预测字段）
   → mock pay
@@ -106,6 +106,7 @@ erDiagram
   APP_USERS ||--o{ ANONYMOUS_SESSIONS : owns
   APP_USERS ||--o{ ASSESSMENTS : owns
   ASSESSMENTS ||--|| ASSESSMENT_CORE_INPUTS : has
+  ASSESSMENTS ||--o| ASSESSMENT_FUNNEL_ANSWERS : drafts
   ASSESSMENTS ||--o| ASSESSMENT_RESULTS : produces
   ASSESSMENT_RESULTS ||--|| ASSESSMENT_RESULT_DETAILS : protects
   APP_USERS ||--o| SUBSCRIPTIONS : entitled_by
@@ -120,6 +121,7 @@ erDiagram
 ## 项目文档
 
 - [plan/README.md](./plan/README.md)：需求追踪、技术选型和两天执行计划
+- [plan/15-product-experience-revision.md](./plan/15-product-experience-revision.md)：产品经理复审、15 题体验重设计与新增持久化
 - [src/app/README.md](./src/app/README.md)：前端 funnel、设计系统、可访问性与交互状态
 - [src/server/README.md](./src/server/README.md)：后端模块、认证、并发和扩展点
 - [supabase/README.md](./supabase/README.md)：迁移、连接、权限模型与数据库操作

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 
-import { QuizFlow } from '@/components/quiz/quiz-flow'
+import { PersonalQuiz } from '@/components/quiz/personal-quiz'
 import { assessmentStepKeySchema } from '@/shared/contracts'
 
 type QuizStepPageProps = {
@@ -13,5 +13,5 @@ export default async function QuizStepPage({ params }: QuizStepPageProps) {
   const parsedStep = assessmentStepKeySchema.safeParse(stepKey)
   if (!parsedStep.success && stepKey !== 'review') notFound()
 
-  return <QuizFlow stepKey={parsedStep.success ? parsedStep.data : 'review'} />
+  return <PersonalQuiz />
 }

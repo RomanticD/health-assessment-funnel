@@ -1,14 +1,15 @@
 import type { Metadata } from 'next'
 
 import './globals.css'
+import './studio.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'Kindred Health · Educational Wellness Snapshot',
+    default: 'Kindred Health · Your Space. Your Pace.',
     template: '%s · Kindred Health',
   },
   description:
-    'A transparent, resumable health assessment demo with server-calculated results and explicit limitations.',
+    'Find a personal starting point for Pilates-inspired movement, everyday habits, and your wellness goals.',
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

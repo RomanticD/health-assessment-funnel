@@ -21,6 +21,29 @@ import {
   type SubmitAssessmentData,
 } from '@/shared/contracts'
 import { QUIZ_VERSION } from '@/shared/contracts/health'
+import {
+  funnelSnapshotSchema,
+  type FunnelKey,
+  type FunnelSnapshot,
+} from '@/shared/contracts/funnel'
+
+// Memory only: cleared on a document reload; never browser storage.
+let warmAssessment: AssessmentProgress | null = null
+export function takeWarmAssessment() {
+  return warmAssessment
+}
+export function rememberAssessment(value: AssessmentProgress) {
+  warmAssessment = value
+}
+export function getFunnel(id: string) {
+  return requestData(`/assessments/${id}/funnel`, funnelSnapshotSchema)
+}
+export function saveFunnel(id: string, snapshot: FunnelSnapshot, key: FunnelKey, value: unknown) {
+  return requestData(`/assessments/${id}/funnel`, funnelSnapshotSchema, {
+    method: 'PUT',
+    ...jsonRequest({ key, value }, { 'If-Match': revisionEtag(snapshot.revision) }),
+  })
+}
 
 const API_BASE = '/api/v1'
 

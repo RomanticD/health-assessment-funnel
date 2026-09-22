@@ -3,6 +3,8 @@
 import { useEffect, useRef } from 'react'
 
 type UpgradeDialogProps = {
+  hasEstimate: boolean
+  hasTimeline: boolean
   open: boolean
   isPaying: boolean
   error: string | null
@@ -10,7 +12,15 @@ type UpgradeDialogProps = {
   onConfirm: () => void
 }
 
-export function UpgradeDialog({ open, isPaying, error, onClose, onConfirm }: UpgradeDialogProps) {
+export function UpgradeDialog({
+  open,
+  isPaying,
+  error,
+  onClose,
+  onConfirm,
+  hasEstimate,
+  hasTimeline,
+}: UpgradeDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
   const confirmRef = useRef<HTMLButtonElement>(null)
 
@@ -93,22 +103,24 @@ export function UpgradeDialog({ open, isPaying, error, onClose, onConfirm }: Upg
             <path d="M9.5 12V8.75a4.5 4.5 0 0 1 9 0V12M7 12h14v11H7z" />
           </svg>
         </div>
-        <p className="eyebrow">Demo access</p>
-        <h2 id="upgrade-title">See the reasoning behind your snapshot.</h2>
+        <p className="eyebrow">Your personal summary</p>
+        <h2 id="upgrade-title">Make room for your next chapter.</h2>
         <p id="upgrade-description">
-          Unlock your exact educational calorie estimate, target-date model, and weekly projection.
-          This calls the mock payment endpoint only.
+          Bring your daily energy guide and estimated progress together in one personal overview.
         </p>
 
         <ul className="unlock-list">
-          <li>Server-calculated BMR and daily energy estimate</li>
-          <li>Exact calorie target when the safety envelope permits it</li>
-          <li>Estimated timeline and weekly weight projection</li>
-          <li>Algorithm version and explicit limitations</li>
+          <li>Your daily energy overview</li>
+          {hasEstimate && <li>Your daily energy target</li>}
+          {hasTimeline ? (
+            <li>Your estimated timeline and weekly outlook</li>
+          ) : (
+            <li>Personal movement suggestions; no target-date prediction for this goal</li>
+          )}
         </ul>
 
         <div className="demo-price">
-          <span>Demo monthly plan</span>
+          <span>Demo checkout</span>
           <strong>$0</strong>
           <small>No card. No charge. No renewal.</small>
         </div>
@@ -126,7 +138,7 @@ export function UpgradeDialog({ open, isPaying, error, onClose, onConfirm }: Upg
           onClick={onConfirm}
           disabled={isPaying}
         >
-          {isPaying ? 'Activating demo access…' : 'Unlock demo result — no real charge'}
+          {isPaying ? 'Opening your summary…' : 'Unlock my summary — free demo'}
         </button>
         <button className="secondary-action secondary-action--full" type="button" onClick={onClose}>
           Keep the free preview

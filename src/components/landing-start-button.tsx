@@ -3,7 +3,12 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { isHealthApiError, quizDestination, recoverOrCreateAssessment } from '@/client/health-api'
+import {
+  isHealthApiError,
+  quizDestination,
+  recoverOrCreateAssessment,
+  rememberAssessment,
+} from '@/client/health-api'
 
 export function LandingStartButton() {
   const router = useRouter()
@@ -17,12 +22,13 @@ export function LandingStartButton() {
 
     try {
       const progress = await recoverOrCreateAssessment()
+      rememberAssessment(progress)
       router.push(quizDestination(progress))
     } catch (error) {
       setMessage(
         isHealthApiError(error) &&
           (error.code === 'SESSION_EXPIRED' || error.code === 'SESSION_REQUIRED')
-          ? 'Your previous session is no longer available. Clear this site’s stored data, then try again to start a fresh assessment.'
+          ? 'Your session has ended. Refresh this page to start again.'
           : error instanceof Error
             ? error.message
             : 'We could not start the assessment. Please try again.',
@@ -40,7 +46,7 @@ export function LandingStartButton() {
         disabled={isLoading}
         aria-describedby={message === null ? 'start-helper' : 'start-error'}
       >
-        <span>{isLoading ? 'Restoring your progress…' : 'Build my wellness snapshot'}</span>
+        <span>{isLoading ? 'Starting…' : 'Find my starting point'}</span>
         {!isLoading && (
           <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
             <path d="m7.5 4.5 5 5-5 5" />
@@ -48,7 +54,7 @@ export function LandingStartButton() {
         )}
       </button>
       <p id="start-helper" className="action-helper">
-        About 2 minutes · No account or real payment
+        3-minute quiz · Made around you
       </p>
       {message !== null && (
         <p id="start-error" className="inline-alert inline-alert--error" role="alert">

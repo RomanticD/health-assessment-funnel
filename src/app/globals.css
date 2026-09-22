@@ -2,18 +2,18 @@
 
 :root {
   color-scheme: light;
-  --ink: #172620;
+  --ink: #292923;
   --ink-soft: #30443b;
   --muted: #586961;
   --muted-strong: #45584f;
-  --surface: #fbfaf5;
+  --surface: #faf8f4;
   --surface-raised: #fffefb;
   --surface-soft: #f1f4ed;
   --surface-accent: #e6f1eb;
   --surface-accent-strong: #d5e8df;
-  --accent: #176b57;
-  --accent-strong: #0d4e40;
-  --accent-deep: #0a3e34;
+  --accent: #8e422f;
+  --accent-strong: #713222;
+  --accent-deep: #53271d;
   --line: #d6ded7;
   --line-strong: #b9c8bf;
   --error: #962f2c;

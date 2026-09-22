@@ -13,7 +13,11 @@ export function SiteHeader({ compact = false }: SiteHeaderProps) {
         <BrandMark />
         <span>Kindred Health</span>
       </Link>
-      <span className="header-note">Private by design · Educational demo</span>
+      {!compact && (
+        <Link className="header-note" href="/#how-it-works">
+          How it works ↗
+        </Link>
+      )}
     </header>
   )
 }

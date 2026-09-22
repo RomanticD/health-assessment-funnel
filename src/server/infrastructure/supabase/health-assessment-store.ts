@@ -193,7 +193,7 @@ function parseRevisionMeta(details: string | undefined): Record<string, unknown>
   }
 }
 
-function mapRpcError(error: SupabaseRpcFailure): ApplicationError {
+export function mapRpcError(error: SupabaseRpcFailure): ApplicationError {
   const publicError =
     error.message === undefined ? undefined : PUBLIC_DATABASE_ERRORS[error.message]
   if (publicError === undefined) {

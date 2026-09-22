@@ -2,6 +2,14 @@
 
 Base URL：`https://health-assessment-funnel.vercel.app/api/v1`。JSON 使用 camelCase，公制单位为 cm、kg、kcal/day。
 
+## Expanded 15-question draft
+
+`GET /assessments/{id}/funnel` returns `{ data: { revision, answers } }`. `PUT` on the same path saves one answer with `{ key, value }` and `If-Match: "rev-N"`. This revision belongs to the draft, separately from the core assessment revision. Same-value retries are no-ops; conflicting stale values return 412. Session ownership, Origin, no-store and strict validation follow the core API. Completed assessments cannot change draft answers.
+
+Keys: `motivation`, `primaryGoal`, `experience`, `activityLevel`, `sitting`, `focus`, `barriers`, `minutes`, `days`, `equipment`, `sexForCalorieEstimation`, `ageYears`, `heightCm`, `weightKg`, `targetWeightKg`. Allowed values and ranges are defined in `src/shared/contracts/funnel.ts`. Measurements are always persisted in metric units. Every question, including an individual measurement, is saved before the UI advances.
+
+The UI checks the latest draft revision before confirmation, synchronizes the validated four core steps, and submits the existing calculation. A database trigger under the assessment lock rejects finalization if core inputs no longer match the latest draft. Preference answers influence the movement summary rather than changing the health formula.
+
 ## Cross-cutting contract
 
 - Browser auth：`__Host-health_session`（HttpOnly、Secure、SameSite=Lax、Path=/）。
