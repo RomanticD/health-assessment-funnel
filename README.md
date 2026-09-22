@@ -55,6 +55,8 @@ Landing
 
 前端不在 Web Storage 保存健康答案或 bearer credential。刷新和跨设备 CLI 恢复以服务端状态为准；写请求使用 ETag/`If-Match` 防止静默覆盖，并用 `Idempotency-Key` 安全重放。
 
+前端页面采用 mobile-first 设计并适配移动端：题目、review、paywall、结果页和底部 CTA 在 375–430px 手机宽度下保持可读、可点击且无横向溢出；同时保留 768px、1024px 和 1440px 的桌面布局。Playwright 使用 390px 移动 viewport 验证完整漏斗、刷新恢复、弹窗焦点和支付后结果，交付截图见 [`delivery/screenshots/`](./delivery/screenshots/)。
+
 题目地址只表达导航状态（例如 `/quiz/ageYears`、`/quiz/review`）；结果路径中的 assessment UUID 也不是授权凭证。复制到没有原 HttpOnly Cookie 的浏览器不会读取结果。完整运行入口、截图、测试位置和 release evidence 见 [delivery/README.md](./delivery/README.md)。
 
 ## 技术栈与工程边界
@@ -166,6 +168,7 @@ erDiagram
 - [docs/deployment.md](./docs/deployment.md)：Supabase/Vercel/CI 部署与回滚
 - [docs/ai-retrospective.md](./docs/ai-retrospective.md)：AI 协作方法、验证证据和一次明确否决
 - [tests/README.md](./tests/README.md)：自动化测试覆盖与限制
+- [delivery/technical-notes/](./delivery/technical-notes/)：后端、Supabase 数据库、测试与 CI 的详细技术难点和验证方式
 
 ## 关键设计取舍
 
