@@ -143,8 +143,11 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
   }
 
   return (
-    <main className="result-page">
+    <main
+      className={result.access === 'preview' ? 'result-page result-page--preview' : 'result-page'}
+    >
       <SiteHeader compact />
+      {result.access === 'preview' && <PreviewUnlockRail onUnlock={openDialog} />}
       <div className="result-wrap result-editorial">
         <header className="result-heading">
           <p className="eyebrow">YOUR WELLNESS PROFILE</p>
@@ -187,7 +190,25 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
   )
 }
 
-function ResultProfile({
+export function PreviewUnlockRail({ onUnlock }: { onUnlock: () => void }) {
+  return (
+    <aside className="preview-unlock-rail" aria-label="Unlock your full summary">
+      <div className="preview-unlock-rail-copy">
+        <p className="eyebrow">DEMO CHECKOUT · $0</p>
+        <strong>Your full summary is ready</strong>
+        <span>See your daily energy guide and estimated timeline.</span>
+      </div>
+      <button className="primary-action" type="button" onClick={onUnlock}>
+        Unlock full summary
+        <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+          <path d="m7.5 4.5 5 5-5 5" />
+        </svg>
+      </button>
+    </aside>
+  )
+}
+
+export function ResultProfile({
   result,
   answers,
 }: {
@@ -281,7 +302,13 @@ function ProfileFacts({ answers }: { answers: FunnelAnswers }) {
   )
 }
 
-function PreviewResult({ result, onUnlock }: { result: PreviewResultData; onUnlock: () => void }) {
+export function PreviewResult({
+  result,
+  onUnlock,
+}: {
+  result: PreviewResultData
+  onUnlock: () => void
+}) {
   const lockedFeatures =
     result.calorieRange === null
       ? ['Your energy at rest', 'Your daily energy overview']
@@ -352,7 +379,7 @@ function PreviewResult({ result, onUnlock }: { result: PreviewResultData; onUnlo
   )
 }
 
-function FullResult({ result }: { result: FullResultData }) {
+export function FullResult({ result }: { result: FullResultData }) {
   return (
     <>
       <section className="energy-summary" aria-labelledby="energy-summary-title">
@@ -539,7 +566,7 @@ function Warnings({ warnings }: { warnings: HealthWarningCode[] }) {
   )
 }
 
-function EducationalFooter() {
+export function EducationalFooter() {
   return (
     <footer className="result-footer">
       <div>
@@ -556,7 +583,7 @@ function EducationalFooter() {
   )
 }
 
-function RoutineSummary({ answers }: { answers: FunnelAnswers }) {
+export function RoutineSummary({ answers }: { answers: FunnelAnswers }) {
   const guidance = [
     answers.experience === 'new'
       ? 'Begin with a gentle introduction to breathing, posture, and controlled movement.'

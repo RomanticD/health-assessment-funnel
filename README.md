@@ -9,6 +9,7 @@
 ## 在线交付
 
 - Web：<https://health-assessment-funnel.vercel.app>
+- Paywall UI 快速调试（固定 Mock 数据）：<https://health-assessment-funnel.vercel.app/demo/paywall>
 - GitHub：<https://github.com/RomanticD/health-assessment-funnel>（private）
 - 健康检查：<https://health-assessment-funnel.vercel.app/api/health>
 - Supabase project ref：`kfyqgzuatywmsuruwsei`

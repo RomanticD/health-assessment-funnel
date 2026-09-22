@@ -66,7 +66,7 @@ test('personal quiz saves each answer, restores measurements, edits and unlocks 
   await expect(page.getByRole('heading', { name: 'Here’s your wellness profile' })).toBeVisible()
   await expect(page.getByText('15 minutes', { exact: true })).toBeVisible()
   await expect(page.getByText(/Break up long periods/)).toBeVisible()
-  await expect(page.getByText('DEMO CHECKOUT · $0', { exact: true })).toBeVisible()
+  await expect(page.getByText('DEMO CHECKOUT · $0', { exact: true }).first()).toBeVisible()
   await expect(page.locator('body')).not.toContainText(
     /health-v1|Mifflin|server-calculated|safety envelope|Decimal half-up/i,
   )
@@ -89,4 +89,20 @@ test('personal quiz saves each answer, restores measurements, edits and unlocks 
   await expect(page.getByText('1,551', { exact: true })).toBeVisible()
   await page.reload()
   await expect(page.getByText('Your full summary', { exact: true })).toBeVisible()
+})
+
+test('fixed mock route opens the paywall without completing the funnel', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/demo/paywall')
+
+  await expect(page.getByRole('heading', { name: 'Preview the unlock moment.' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Unlock full summary' })).toBeVisible()
+  await expect(page.getByText('DEMO CHECKOUT · $0', { exact: true }).first()).toBeVisible()
+  await page.screenshot({ path: 'test-results/paywall-test-route.png', fullPage: true })
+
+  await page.getByRole('button', { name: 'Unlock full summary' }).click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await page.getByRole('button', { name: 'Unlock my summary — free demo' }).click()
+  await expect(page.getByText('Mock full summary', { exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Numbers to help you plan.' })).toBeVisible()
 })

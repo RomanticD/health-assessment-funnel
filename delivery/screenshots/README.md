@@ -6,6 +6,7 @@
 - `question-mobile.png`
 - `result-preview-mobile.png`
 - `paywall-dialog-mobile.png`
+- `paywall-test-route.png`（固定 Mock paywall 调试 URL）
 - `result-full-mobile.png` / `result-full-desktop.png`
 
 同一测试也会把截图作为 GitHub Actions artifact 上传，便于复核。
@@ -14,6 +15,6 @@
 
 1. Landing：全宽 header 与 values strip。
 2. Question：统一编号/indicator、按压反馈和按钮内 saving 状态。
-3. Result preview：BMI scale、免费 preview、首屏 `DEMO CHECKOUT · $0` paywall。
+3. Result preview：BMI scale、免费 preview、底部固定的 `DEMO CHECKOUT · $0` paywall。
 4. Upgrade dialog：无卡、无扣款、无续期的模拟 checkout。
 5. Full result：energy rows、渐变面积图、Goal 标签和 reduced-motion 降级。
