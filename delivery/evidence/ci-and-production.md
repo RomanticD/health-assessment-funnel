@@ -29,4 +29,6 @@
 
 当前只读 fixture：`sessionId=Cm4dsRc3ybdSeNc3CPYuHVumgLi4HLQ6lnWy_s0eOAY`，`assessmentId=2378aded-3fab-4ed5-a958-ac73d09dddad`，有效期至 `2026-10-22T11:46:35Z`。Supabase 查询确认其 `app_users.kind=demo_readonly`；线上 Playwright smoke 确认 full read 成功，create/step/submit/pay 写入均返回 `403 DEMO_SESSION_READ_ONLY`。
 
+此前 README 使用的 7 天 `standard` fixture 已在 Supabase 撤销 session；旧凭证线上返回 `401 SESSION_EXPIRED`，不再具备读写能力。这样 Git 历史中的旧公开凭证也不会继续污染可演示数据。
+
 若轮换 paid fixture，只更新 README/本目录的合成 session、assessment、expiry，并重新执行上述 smoke；不修改任何 secret。

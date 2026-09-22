@@ -22,11 +22,12 @@
 
 1. 公开 paid fixture 不再使用 `standard` 用户。由于 `app_users_enforce_identity` 明确禁止更新 `kind`，已创建新的 `demo_readonly` user/session/assessment/result/subscription/payment event，并把 README 凭证轮换到新记录。
 2. 新 fixture 有效期为 30 天轮换窗口；线上查询确认 `kind=demo_readonly`、assessment `completed`、subscription `active`、payment event 仅一条。
-3. Playwright 线上 smoke 确认新凭证能读 `access=full` 且包含 projection；create assessment 与 `/pay` 均返回 `403 DEMO_SESSION_READ_ONLY`。
-4. submit 服务原先会先读 assessment，未知 ID 可能在 read-only session 上返回 404；现在先检查 session write capability，所有四类 mutation 都返回稳定 403。该场景加入真实 Supabase integration suite。
-5. OpenAPI 补齐 `/assessments/{assessmentId}/funnel` GET/PUT，并删除 submit/pay 不实际返回的 201 响应。
-6. GitHub Actions 的 Playwright job 现在安装 Chromium、运行真实 stack，并总是上传 report/results；CI 设置 `failOnFlakyTests`，E2E 使用 URL 事件等待代替固定 5 秒等待。
-7. 根 README 已改为真实产品定位，去掉挑战/教育性 demo 的产品描述；支付仍明确标为 sandbox activation，避免把模拟支付误述为真实支付渠道。
+3. 此前 README 中的 7 天 `standard` fixture 已在 Supabase 撤销；线上旧凭证返回 `401 SESSION_EXPIRED`，不会再成为可重放的污染入口。
+4. Playwright 线上 smoke 确认新凭证能读 `access=full` 且包含 projection；create assessment 与 `/pay` 均返回 `403 DEMO_SESSION_READ_ONLY`。
+5. submit 服务原先会先读 assessment，未知 ID 可能在 read-only session 上返回 404；现在先检查 session write capability，所有四类 mutation 都返回稳定 403。该场景加入真实 Supabase integration suite。
+6. OpenAPI 补齐 `/assessments/{assessmentId}/funnel` GET/PUT，并删除 submit/pay 不实际返回的 201 响应。
+7. GitHub Actions 的 Playwright job 现在安装 Chromium、运行真实 stack，并总是上传 report/results；CI 设置 `failOnFlakyTests`，E2E 使用 URL 事件等待代替固定 5 秒等待。
+8. 根 README 已改为真实产品定位，去掉挑战/教育性 demo 的产品描述；支付仍明确标为 sandbox activation，避免把模拟支付误述为真实支付渠道。
 
 ## CI / Playwright 结论
 
