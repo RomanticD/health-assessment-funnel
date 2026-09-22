@@ -22,6 +22,7 @@ test('personal quiz saves each answer, restores measurements, edits and unlocks 
   await page.getByRole('button', { name: 'Continue →' }).click()
   await expect(page).toHaveURL(/\/quiz\/primaryGoal$/)
   await page.getByRole('button', { name: /Lose weight/ }).click()
+  await page.waitForTimeout(350)
   await page.screenshot({ path: 'test-results/question-mobile.png', fullPage: true })
   await page.getByRole('button', { name: /I’m brand new/ }).click()
   await page.getByRole('button', { name: /1–3 days a week/ }).click()
