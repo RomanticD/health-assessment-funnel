@@ -1,0 +1,76 @@
+import { expect, test } from '@playwright/test'
+
+test('personal quiz saves each answer, restores measurements, edits and unlocks results', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  let sessionRequests = 0
+  page.on('request', (request) => {
+    if (request.url().endsWith('/api/v1/sessions')) sessionRequests++
+  })
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: /A little movement/ })).toBeVisible()
+  await page.screenshot({ path: 'test-results/landing-mobile.png', fullPage: true })
+  await page.getByRole('button', { name: 'Find my starting point' }).click()
+  await page.getByRole('button', { name: /A stronger body/ }).click()
+  await page.getByRole('button', { name: /More flexibility/ }).click()
+  await page.getByRole('button', { name: 'Continue →' }).click()
+  await page.getByRole('button', { name: /Lose weight/ }).click()
+  await page.screenshot({ path: 'test-results/question-mobile.png', fullPage: true })
+  await page.getByRole('button', { name: /I’m brand new/ }).click()
+  await page.getByRole('button', { name: /1–3 days a week/ }).click()
+  await page.getByRole('button', { name: /More than 8 hours/ }).click()
+  await page.getByRole('button', { name: /My whole body/ }).click()
+  await page.getByRole('button', { name: 'Continue →' }).click()
+  await page.getByRole('button', { name: /Finding the time/ }).click()
+  await page.getByRole('button', { name: 'Continue →' }).click()
+  await page.getByRole('button', { name: /15 minutes/ }).click()
+  await page.getByRole('button', { name: /3 days a week/ }).click()
+  await page.getByRole('button', { name: /Just me/ }).click()
+  await page.getByRole('button', { name: /Female/ }).click()
+  expect(sessionRequests).toBe(1)
+  await expect(page.getByText('Restoring your assessment')).toHaveCount(0)
+  await page.getByRole('spinbutton').fill('17')
+  await page.getByRole('button', { name: 'Continue →' }).click()
+  await expect(page.locator('#measurement-error')).toContainText('18 to 80')
+  await page.getByRole('spinbutton').fill('32')
+  await page.getByRole('button', { name: 'Continue →' }).click()
+  await page.reload()
+  await expect(page.getByRole('heading', { name: 'How tall are you?' })).toBeVisible()
+  await expect(page.evaluate(() => localStorage.length)).resolves.toBe(0)
+  await expect(page.evaluate(() => sessionStorage.length)).resolves.toBe(0)
+  for (const [title, value] of [
+    ['How tall are you?', '165'],
+    ['What is your current weight?', '70'],
+    ['What weight would you like to work toward?', '60'],
+  ]) {
+    await expect(page.getByRole('heading', { name: title })).toBeVisible()
+    await page.getByRole('spinbutton').fill(value!)
+    await page.getByRole('button', { name: 'Continue →' }).click()
+  }
+  await expect(page.getByRole('heading', { name: 'Does everything look right?' })).toBeVisible()
+  await page.getByRole('button', { name: /How old are you/ }).click()
+  await expect(page.getByRole('spinbutton')).toHaveValue('32')
+  await page.getByRole('button', { name: 'Continue →' }).click()
+  await page.getByRole('button', { name: 'See my personal summary →' }).click()
+  await expect(page).toHaveURL(/\/results\/[0-9a-f-]+$/)
+  await expect(page.getByRole('heading', { name: 'Your personal starting point.' })).toBeVisible()
+  await expect(page.getByText('15 minutes', { exact: true })).toBeVisible()
+  await expect(page.getByText(/Break up long periods/)).toBeVisible()
+  await expect(page.locator('body')).not.toContainText(
+    /health-v1|Mifflin|server-calculated|safety envelope|Decimal half-up/i,
+  )
+  expect(await page.evaluate(() => document.body.scrollWidth)).toBeLessThanOrEqual(390)
+  await page.getByRole('button', { name: 'Explore my full summary' }).click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Unlock my summary — free demo' })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toBeHidden()
+  await page.getByRole('button', { name: 'Explore my full summary' }).click()
+  await page.getByRole('button', { name: 'Unlock my summary — free demo' }).click()
+  await expect(page.getByText('Your full summary', { exact: true })).toBeVisible()
+  await page.screenshot({ path: 'test-results/result-mobile.png', fullPage: true })
+  await expect(page.getByText('1,551', { exact: true })).toBeVisible()
+  await page.reload()
+  await expect(page.getByText('Your full summary', { exact: true })).toBeVisible()
+})

@@ -11,13 +11,21 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:webpack": "next build --webpack",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "verify:core": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm build",
+    "test": "pnpm test:unit && pnpm test:integration",
+    "test:unit": "vitest run --config vitest.unit.config.mts",
+    "test:integration": "node tests/support/with-test-stack.mjs integration",
+    "test:e2e": "node tests/support/with-test-stack.mjs e2e",
+    "test:stack": "node tests/support/with-test-stack.mjs all",
+    "test:coverage": "vitest run --config vitest.unit.config.mts --coverage",
+    "verify:core": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm build",
+    "verify": "pnpm verify:core && pnpm test:stack",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "db:reset": "supabase db reset"
@@ -32,18 +40,22 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "26.6.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "@vitest/coverage-v8": "5.0.1",
     "eslint": "9.39.5",
     "eslint-config-next": "16.3.5",
+    "fast-check": "4.10.2",
     "postcss": "8.5.6",
     "prettier": "3.9.8",
     "supabase": "2.117.0",
     "tailwindcss": "4.3.3",
     "tsx": "4.23.15",
     "typescript": "6.0.3",
-    "vercel": "59.23.2"
+    "vercel": "59.23.2",
+    "vitest": "5.0.1"
   }
 }
