@@ -1226,7 +1226,7 @@
 
 .chart-goal-tag {
   opacity: 0;
-  animation: chart-dot-in 260ms ease-out 780ms forwards;
+  animation: chart-goal-in 260ms ease-out 780ms forwards;
 }
 
 .chart-goal-tag rect {
@@ -1262,6 +1262,15 @@
     opacity: 1;
     transform: scale(1);
     transform-origin: center;
+  }
+}
+
+@keyframes chart-goal-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 

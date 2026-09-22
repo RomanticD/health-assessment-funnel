@@ -6,7 +6,7 @@
 - `question-mobile.png`
 - `result-preview-mobile.png`
 - `paywall-dialog-mobile.png`
-- `result-full-mobile.png`
+- `result-full-mobile.png` / `result-full-desktop.png`
 
 同一测试也会把截图作为 GitHub Actions artifact 上传，便于复核。
 
