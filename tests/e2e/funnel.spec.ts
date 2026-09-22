@@ -100,6 +100,11 @@ test('fixed mock route opens the paywall without completing the funnel', async (
   await expect(page.getByText('DEMO CHECKOUT · $0', { exact: true }).first()).toBeVisible()
   await page.screenshot({ path: 'test-results/paywall-test-route.png', fullPage: true })
 
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Unlock full summary' })).toBeVisible()
+  await page.screenshot({ path: 'test-results/paywall-test-route-desktop.png', fullPage: true })
+
   await page.getByRole('button', { name: 'Unlock full summary' }).click()
   await expect(page.getByRole('dialog')).toBeVisible()
   await page.getByRole('button', { name: 'Unlock my summary — free demo' }).click()
