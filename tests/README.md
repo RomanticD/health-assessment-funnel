@@ -56,6 +56,7 @@ If Docker is unavailable, the Supabase CLI exits with its direct diagnostic rath
 - Expanded draft API: partial measurement recovery, same-value replay, concurrent revisions, cross-session denial, numeric validation, and exclusive multi-select answers.
 - No repeated session requests while advancing questions; loading feedback stays in the active control.
 - Reload after an intermediate step proves recovery; reload after payment proves entitlement persistence.
+- The full-result projection chart stays in a waiting state until it enters the viewport, then starts its one-shot animation.
 - Invalid minor age stays on the body step and marks the field invalid.
 - Health answers/session credentials are absent from `localStorage` and `sessionStorage`.
 - The mobile document has no horizontal overflow; dialog receives focus before payment.

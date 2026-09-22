@@ -503,6 +503,35 @@ function MetricRow({
 }
 
 function ProjectionChart({ points }: { points: WeightProjectionPoint[] }) {
+  const chartRef = useRef<HTMLElement | null>(null)
+  const [hasEnteredViewport, setHasEnteredViewport] = useState(false)
+
+  useEffect(() => {
+    const chart = chartRef.current
+    if (!chart) return
+
+    if (typeof IntersectionObserver === 'undefined') {
+      const fallbackId = window.setTimeout(() => setHasEnteredViewport(true), 0)
+      return () => window.clearTimeout(fallbackId)
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setHasEnteredViewport(true)
+          observer.disconnect()
+        }
+      },
+      {
+        rootMargin: '0px 0px -14% 0px',
+        threshold: 0.25,
+      },
+    )
+
+    observer.observe(chart)
+    return () => observer.disconnect()
+  }, [])
+
   const weights = points.map((point) => point.weightKg)
   const minimum = Math.min(...weights)
   const maximum = Math.max(...weights)
@@ -529,7 +558,13 @@ function ProjectionChart({ points }: { points: WeightProjectionPoint[] }) {
   const last = points.at(-1)
 
   return (
-    <figure className="projection-chart">
+    <figure
+      ref={chartRef}
+      className={
+        hasEnteredViewport ? 'projection-chart projection-chart--visible' : 'projection-chart'
+      }
+      data-animation-state={hasEnteredViewport ? 'visible' : 'waiting'}
+    >
       <svg
         viewBox="0 0 720 220"
         role="img"

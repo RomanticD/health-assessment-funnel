@@ -38,13 +38,15 @@ pnpm exec playwright install --with-deps chromium
 pnpm test:stack
 ```
 
-本地 fresh stack 验证结果：47 unit tests、21 integration tests、2 Chromium E2E tests 均通过；最近一次 E2E 首次运行没有 retry/flaky。
+本地 fresh stack 验证结果：47 unit tests、21 integration tests、3 Chromium E2E tests 均通过；最近一次 E2E 首次运行没有 retry/flaky。
 
 修订 commit `6306d97` 的远端 run `35724751307` 中，quality job 已通过，integration 的 21 个 API tests 也已通过；唯一失败是 Chromium 首条测试在 CI 冷启动时超过 Playwright 默认 30 秒总测试预算，retry 后业务断言通过。为保留 `failOnFlakyTests` 的严格策略，已将 CI E2E 总预算提高到 60 秒，而不是允许 flaky 通过；本地复跑仍为首次 2/2 通过。
 
-修复后的 commit `d6aed85` 对应 run `35725526106` 已全绿：quality 与 integration-e2e 均成功，21 个 integration tests 和 2 个 Chromium E2E 首次通过，没有 flaky retry。
+修复后的 commit `d6aed85` 对应 run `35725526106` 已全绿：quality 与 integration-e2e 均成功，21 个 integration tests 和 2 个 Chromium E2E 首次通过，没有 flaky retry；后续新增 API reference 场景后，当前总数为 3 个 Chromium E2E。
 
 本次最终文档/API reference 变更的 commit `fcb8adc` 对应 run [#35732889517](https://github.com/RomanticD/health-assessment-funnel/actions/runs/35732889517) 已再次全绿；quality 与 integration-e2e 均成功，新增 OpenAPI 页面 E2E 也通过。
+
+包含最新交付证据的 commit `94d89e4` 对应 run [#35734343090](https://github.com/RomanticD/health-assessment-funnel/actions/runs/35734343090) 也已全绿，Playwright 链路为 3 个 Chromium 场景。
 
 ## 仍属于计划中的生产强化项
 

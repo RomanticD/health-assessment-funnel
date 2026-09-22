@@ -113,6 +113,10 @@ test('fixed mock route opens the paywall without completing the funnel', async (
   await page.getByRole('button', { name: 'Unlock full summary — no charge' }).click()
   await expect(page.getByText('Your full summary', { exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Numbers to help you plan.' })).toBeVisible()
+  const projectionChart = page.locator('.projection-chart')
+  await expect(projectionChart).toHaveAttribute('data-animation-state', 'waiting')
+  await projectionChart.scrollIntoViewIfNeeded()
+  await expect(projectionChart).toHaveAttribute('data-animation-state', 'visible')
 })
 
 test('public API reference serves the versioned OpenAPI document', async ({ page }) => {

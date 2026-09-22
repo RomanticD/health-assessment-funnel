@@ -20,7 +20,7 @@ erDiagram
 
   APP_USERS {
     uuid id PK
-    text kind "standard|demo_readonly"
+    text kind
     timestamptz created_at
     timestamptz updated_at
     timestamptz last_seen_at
@@ -36,12 +36,12 @@ erDiagram
     uuid id PK
     uuid user_id FK
     text quiz_version
-    text status "draft|ready|completed"
+    text status
     bigint revision
     timestamptz submitted_at
   }
   ASSESSMENT_CORE_INPUTS {
-    uuid assessment_id PK_FK
+    uuid assessment_id PK
     text sex_for_calorie_estimation
     text primary_goal
     smallint age_years
@@ -52,7 +52,7 @@ erDiagram
   }
   ASSESSMENT_RESULTS {
     uuid id PK
-    uuid assessment_id UK_FK
+    uuid assessment_id UK
     text algorithm_version
     bigint input_revision
     jsonb input_snapshot
@@ -64,7 +64,7 @@ erDiagram
     jsonb warnings
   }
   ASSESSMENT_RESULT_DETAILS {
-    uuid result_id PK_FK
+    uuid result_id PK
     int bmr_kcal
     int tdee_kcal
     int exact_daily_calories
@@ -73,7 +73,7 @@ erDiagram
   }
   SUBSCRIPTIONS {
     uuid id PK
-    uuid user_id UK_FK
+    uuid user_id UK
     text status
     text plan_code
     timestamptz valid_from

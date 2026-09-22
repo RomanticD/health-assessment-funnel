@@ -3,7 +3,7 @@
 ## CI
 
 - Workflow：`.github/workflows/ci.yml`
-- 本次发布 run：[#35732889517](https://github.com/RomanticD/health-assessment-funnel/actions/runs/35732889517)（commit `fcb8adc06ca403a7cb951ea954a336e3faeace99`）
+- 本次发布 run：[#35734343090](https://github.com/RomanticD/health-assessment-funnel/actions/runs/35734343090)（commit `94d89e4a608636812da34788c6488702bb4fe3ae`）
 - Quality job：format、lint、typecheck、unit coverage、production build
 - Integration/E2E job：Supabase stack、migration、HTTP 集成和 Chromium 全流程
 - GitHub Actions 页面：https://github.com/RomanticD/health-assessment-funnel/actions

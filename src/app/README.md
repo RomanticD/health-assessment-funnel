@@ -32,6 +32,7 @@ Interaction constraints:
 - Back links are deterministic, deep links are reconciled with the server’s `nextStep`, and refreshed pages restore confirmed progress.
 - The paywall dialog moves focus inside, traps Tab/Shift+Tab, closes with Escape or its close control, restores prior focus, and prevents background scrolling.
 - Motion is limited to state communication and subtle elevation; `prefers-reduced-motion` disables it.
+- The paid-result projection chart uses `IntersectionObserver`: its line/fill animation starts once the chart enters the viewport, rather than during initial page render.
 - Icons are inline CSS-styled SVGs with decorative icons hidden from assistive technology; no emoji are used as controls.
 
 See `plan/09-frontend-funnel-plan.md` for the product rationale and acceptance flow.

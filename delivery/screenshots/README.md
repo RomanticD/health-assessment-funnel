@@ -8,7 +8,7 @@
 - `paywall-dialog-mobile.png`
 - `paywall-test-route.png` / `paywall-test-route-desktop.png`（固定合成结果入口，移动与桌面）
 - `result-full-mobile.png` / `result-full-desktop.png`
-- Supabase 远端 `public` schema：已在 Safari 中完成可视化核验；评审可直接打开 [Schema Visualizer](https://supabase.com/dashboard/project/kfyqgzuatywmsuruwsei/database/schemas)。仓库同时提供 [Mermaid ERD](../schema/assessment-erd.md)，避免把需要登录的控制台截图当成唯一结构证据。
+- Supabase 远端 `public` schema：已在 Safari 中完成可视化核验，仓库保留 [Schema Visualizer 截图](../schema/supabase-schema-visualizer.md)。仓库同时提供 [Mermaid ERD](../schema/assessment-erd.md)，截图与可渲染结构图可以互相核对。
 
 同一测试也会把截图作为 GitHub Actions artifact 上传，便于复核。
 

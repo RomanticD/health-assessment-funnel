@@ -6,13 +6,12 @@
 
 ## 线上与仓库
 
-- 公网演示：https://health-assessment-funnel.vercel.app
-- 结果访问与 checkout 页面：https://health-assessment-funnel.vercel.app/demo/paywall（固定合成数据，不写入 Supabase）
+- 线上应用：[health-assessment-funnel.vercel.app](https://health-assessment-funnel.vercel.app)
+- 结果访问与 checkout 页面：[打开固定结果页面](https://health-assessment-funnel.vercel.app/demo/paywall)（固定合成数据，不写入 Supabase）
 - GitHub：https://github.com/RomanticD/health-assessment-funnel
 - 健康检查：https://health-assessment-funnel.vercel.app/api/health
 - API reference（Swagger UI）：https://health-assessment-funnel.vercel.app/api-docs
 - OpenAPI 3.1：<https://health-assessment-funnel.vercel.app/openapi.yaml>
-- 设计/产品复审：[plan/16-p0-product-review.md](../plan/16-p0-product-review.md)
 
 ## 评审者 5 分钟路径
 
@@ -69,8 +68,13 @@ curl --fail-with-body "$BASE_URL/api/v1/assessments/$ASSESSMENT_ID/result" \
 | API 文档与 cURL                 | [在线 Swagger UI](https://health-assessment-funnel.vercel.app/api-docs)、[OpenAPI 3.1](https://health-assessment-funnel.vercel.app/openapi.yaml)、[docs/api.md](../docs/api.md)、[evidence/api-and-payment.md](evidence/api-and-payment.md) |
 | 15 题分步保存/恢复              | [evidence/requirements-matrix.md](evidence/requirements-matrix.md)、[src/components/quiz/personal-quiz.tsx](../src/components/quiz/personal-quiz.tsx)                                                                                       |
 | 订阅鉴权与差异化结果            | [evidence/api-and-payment.md](evidence/api-and-payment.md)、[tests/integration/access-payment-api.test.ts](../tests/integration/access-payment-api.test.ts)、[tests/e2e/funnel.spec.ts](../tests/e2e/funnel.spec.ts)                        |
-| 测试与边界覆盖                  | [evidence/test-map.md](evidence/test-map.md)                                                                                                                                                                                                |
-| 数据库 Schema 图                | [schema/assessment-erd.md](schema/assessment-erd.md)、[Supabase Schema Visualizer](https://supabase.com/dashboard/project/kfyqgzuatywmsuruwsei/database/schemas)、[docs/database.md](../docs/database.md)                                   |
+| 自动化测试总览与一键命令        | [evidence/test-delivery.md](evidence/test-delivery.md)、[tests/README.md](../tests/README.md)                                                                                                                                               |
+| Unit / domain 测试              | [tests/unit/](../tests/unit/)、[evidence/test-map.md](evidence/test-map.md)                                                                                                                                                                 |
+| Supabase integration / API 测试 | [tests/integration/](../tests/integration/)、[tests/support/with-test-stack.mjs](../tests/support/with-test-stack.mjs)                                                                                                                      |
+| Playwright 浏览器测试           | [tests/e2e/funnel.spec.ts](../tests/e2e/funnel.spec.ts)、[playwright.config.ts](../playwright.config.ts)、[evidence/test-delivery.md](evidence/test-delivery.md)                                                                            |
+| GitHub Actions 配置与通过证据   | [.github/workflows/ci.yml](../.github/workflows/ci.yml)、[evidence/ci-and-production.md](evidence/ci-and-production.md)、[CI run #35734343090](https://github.com/RomanticD/health-assessment-funnel/actions/runs/35734343090)              |
+| 测试场景映射与边界说明          | [evidence/test-map.md](evidence/test-map.md)                                                                                                                                                                                                |
+| 数据库 Schema 图                | [schema/assessment-erd.md](schema/assessment-erd.md)、[schema/supabase-schema-visualizer.md](schema/supabase-schema-visualizer.md)、[docs/database.md](../docs/database.md)                                                                 |
 | CI / 部署 / smoke               | [evidence/ci-and-production.md](evidence/ci-and-production.md)                                                                                                                                                                              |
 | Supabase fixture 轮换与拒写证据 | [evidence/supabase-fixture.md](evidence/supabase-fixture.md)                                                                                                                                                                                |
 | AI 使用复盘                     | [docs/ai-retrospective.md](../docs/ai-retrospective.md)、[evidence/ai-review.md](evidence/ai-review.md)                                                                                                                                     |

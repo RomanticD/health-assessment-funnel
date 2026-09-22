@@ -1446,6 +1446,9 @@
 .chart-area {
   fill: url('#projection-fill-gradient');
   opacity: 0;
+}
+
+.projection-chart--visible .chart-area {
   animation: chart-area-in 850ms ease-out 160ms forwards;
 }
 
@@ -1453,16 +1456,26 @@
   stroke: url('#projection-line-gradient');
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
+}
+
+.projection-chart--visible .chart-line {
+  stroke-dasharray: 1000;
   animation: chart-line-draw 780ms cubic-bezier(0.22, 0.8, 0.35, 1) forwards;
 }
 
 .chart-dot {
   opacity: 0;
+}
+
+.projection-chart--visible .chart-dot {
   animation: chart-dot-in 260ms ease-out 720ms forwards;
 }
 
 .chart-goal-tag {
   opacity: 0;
+}
+
+.projection-chart--visible .chart-goal-tag {
   animation: chart-goal-in 260ms ease-out 780ms forwards;
 }
 
