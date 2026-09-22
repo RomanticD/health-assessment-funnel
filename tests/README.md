@@ -45,6 +45,7 @@ If Docker is unavailable, the Supabase CLI exits with its direct diagnostic rath
 - Cross-session read/write/payment attempts return `404` (BOLA/IDOR resistance).
 - Repeated submit is idempotent and produces one stable result.
 - Unpaid result is recursively checked for protected fields; `/pay` changes the same session to a complete full result; repeated payment is idempotent.
+- A `demo_readonly` paid fixture can read a full result but receives `DEMO_SESSION_READ_ONLY` from create, step-save, submit and payment writes.
 - Public Data API credentials cannot read business tables directly.
 - RFC 7807 content type, stable error code/status/trace ID, `private, no-store`, `Vary`, and ETag behavior.
 - Missing/malformed auth, conflicting bearer/cookie credentials, exact cookie Origin enforcement, bearer CLI behavior, missing/unsafe headers, unknown fields, illegal numeric injection, unsupported media type, malformed JSON, and bodies over 16 KiB.

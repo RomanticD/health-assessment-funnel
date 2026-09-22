@@ -164,6 +164,58 @@ paths:
         '412': { $ref: '#/components/responses/Problem' }
         '422': { $ref: '#/components/responses/Problem' }
         '428': { $ref: '#/components/responses/Problem' }
+  /assessments/{assessmentId}/funnel:
+    parameters:
+      - $ref: '#/components/parameters/AssessmentId'
+    get:
+      tags: [Assessments]
+      summary: Read the expanded 15-question funnel snapshot
+      operationId: getFunnelAnswers
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Server-authoritative funnel answers and revision.
+          headers:
+            ETag:
+              schema: { type: string, pattern: '^"rev-(0|[1-9][0-9]*)"$' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FunnelSnapshotEnvelope' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+    put:
+      tags: [Assessments]
+      summary: Persist one expanded funnel answer
+      operationId: saveFunnelAnswer
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FunnelPatchRequest' }
+      responses:
+        '200':
+          description: Funnel answer saved (same-value retries are no-ops).
+          headers:
+            ETag:
+              schema: { type: string, pattern: '^"rev-(0|[1-9][0-9]*)"$' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FunnelSnapshotEnvelope' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '412': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '428': { $ref: '#/components/responses/Problem' }
   /assessments/{assessmentId}/submit:
     parameters:
       - $ref: '#/components/parameters/AssessmentId'
@@ -187,11 +239,6 @@ paths:
       responses:
         '200':
           description: Idempotent replay of an existing submission.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/SubmitEnvelope' }
-        '201':
-          description: Result created.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/SubmitEnvelope' }
@@ -248,11 +295,6 @@ paths:
       responses:
         '200':
           description: Existing active entitlement was left unchanged.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/PayEnvelope' }
-        '201':
-          description: Subscription activated.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/PayEnvelope' }
@@ -409,6 +451,86 @@ components:
       required: [data]
       properties:
         data: { $ref: '#/components/schemas/AssessmentProgress' }
+    FunnelSnapshotEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/FunnelSnapshot' }
+    FunnelSnapshot:
+      type: object
+      additionalProperties: false
+      required: [revision, answers]
+      properties:
+        revision: { type: integer, minimum: 0 }
+        answers: { $ref: '#/components/schemas/FunnelAnswers' }
+    FunnelPatchRequest:
+      type: object
+      additionalProperties: false
+      required: [key, value]
+      properties:
+        key:
+          type: string
+          enum:
+            [
+              motivation,
+              primaryGoal,
+              experience,
+              activityLevel,
+              sitting,
+              focus,
+              barriers,
+              minutes,
+              days,
+              equipment,
+              sexForCalorieEstimation,
+              ageYears,
+              heightCm,
+              weightKg,
+              targetWeightKg,
+            ]
+        value:
+          description: Value validated against the selected key's enum, array or metric range.
+          oneOf:
+            - type: string
+            - type: integer
+            - type: number
+            - type: array
+              items: { type: string }
+    FunnelAnswers:
+      type: object
+      additionalProperties: false
+      properties:
+        motivation:
+          type: array
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+          items: { type: string, enum: [strength, flexibility, posture, energy, calm] }
+        primaryGoal: { type: string, enum: [lose_weight, maintain_weight, gain_weight] }
+        experience: { type: string, enum: [new, some, regular] }
+        activityLevel: { type: string, enum: [sedentary, light, moderate, active, very_active] }
+        sitting: { type: string, enum: [little, some, mostly] }
+        focus:
+          type: array
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+          items: { type: string, enum: [whole_body, core, back, legs, arms] }
+        barriers:
+          type: array
+          minItems: 1
+          maxItems: 4
+          uniqueItems: true
+          items: { type: string, enum: [time, consistency, confidence, none] }
+        minutes: { type: string, enum: ['10', '15', '20', '30'] }
+        days: { type: string, enum: ['2', '3', '4', '5'] }
+        equipment: { type: string, enum: [none, mat, bands] }
+        sexForCalorieEstimation: { type: string, enum: [female, male] }
+        ageYears: { type: integer, minimum: 18, maximum: 80 }
+        heightCm: { type: number, minimum: 120, maximum: 230, multipleOf: 0.01 }
+        weightKg: { type: number, minimum: 35, maximum: 300, multipleOf: 0.01 }
+        targetWeightKg: { type: number, minimum: 35, maximum: 300, multipleOf: 0.01 }
     SexStepRequest:
       type: object
       additionalProperties: false

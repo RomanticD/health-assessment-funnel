@@ -1,3 +1,6 @@
+import { createHash, randomBytes } from 'node:crypto'
+
+import { createClient } from '@supabase/supabase-js'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -27,6 +30,86 @@ const protectedKeys = [
 ]
 
 describe('result entitlement and mock payment', () => {
+  it('keeps a public paid fixture readable but rejects every business write', async () => {
+    const token = randomBytes(32).toString('base64url')
+    const digest = createHash('sha256').update(token).digest('hex')
+    const admin = createClient(
+      process.env.SUPABASE_URL ?? '',
+      process.env.SUPABASE_SECRET_KEY ?? '',
+      { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } },
+    )
+    const user = await admin
+      .from('app_users')
+      .insert({ kind: 'demo_readonly' })
+      .select('id')
+      .single()
+    if (user.error !== null || user.data === null)
+      throw user.error ?? new Error('Fixture user was not created.')
+    const session = await admin.from('anonymous_sessions').insert({
+      user_id: user.data.id,
+      token_hash: `\\x${digest}`,
+      expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    })
+    if (session.error !== null) throw session.error
+
+    const headers = bearerHeaders({ token, cookie: '' })
+    const assessmentId = crypto.randomUUID()
+    const requests: Array<
+      Promise<ReturnType<typeof request> extends Promise<infer T> ? T : never>
+    > = [
+      request(
+        '/api/v1/assessments',
+        jsonInit(
+          'POST',
+          { quizVersion: 'health-v1' },
+          {
+            ...headers,
+            'Idempotency-Key': idempotencyKey('readonly-create'),
+          },
+        ),
+      ),
+      request(
+        `/api/v1/assessments/${assessmentId}/steps/sex`,
+        jsonInit(
+          'PUT',
+          { data: { sexForCalorieEstimation: 'female' } },
+          {
+            ...headers,
+            'If-Match': '"rev-0"',
+            'Idempotency-Key': idempotencyKey('readonly-step'),
+          },
+        ),
+      ),
+      request(
+        `/api/v1/assessments/${assessmentId}/submit`,
+        jsonInit(
+          'POST',
+          {},
+          {
+            ...headers,
+            'If-Match': '"rev-0"',
+            'Idempotency-Key': idempotencyKey('readonly-submit'),
+          },
+        ),
+      ),
+      request(
+        '/api/v1/pay',
+        jsonInit(
+          'POST',
+          { assessmentId, planCode: 'demo_monthly' },
+          {
+            ...headers,
+            'Idempotency-Key': idempotencyKey('readonly-pay'),
+          },
+        ),
+      ),
+    ]
+
+    for (const result of await Promise.all(requests)) {
+      expectProblem(result, 403, 'DEMO_SESSION_READ_ONLY')
+    }
+  })
+
   it('moves from structurally redacted preview to full result only after /pay', async () => {
     const session = await createSession()
     const ready = await completeAssessment(session)

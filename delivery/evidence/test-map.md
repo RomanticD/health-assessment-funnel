@@ -12,15 +12,16 @@ pnpm verify           # format/lint/typecheck/coverage/build + stack
 
 ## 场景映射
 
-| 场景                                                       | 测试位置                                                                            |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| BMI、极端/缺失/非法身高体重年龄、目标方向                  | `tests/unit/health-assessment-v1.test.ts`                                           |
-| 预测日期边界、维护目标、超长 horizon                       | `tests/unit/result-projection.test.ts`、`tests/unit/health-assessment-v1.test.ts`   |
-| 分步保存、恢复、乱序、重复、并发 revision                  | `tests/integration/persistence-api.test.ts`、`tests/integration/funnel-api.test.ts` |
-| 非会员脱敏、会员完整、受保护字段递归扫描                   | `tests/integration/access-payment-api.test.ts`                                      |
-| `/pay` 状态变化、幂等 replay、支付后 full                  | `tests/integration/access-payment-api.test.ts`                                      |
-| session/cookie/Bearer/origin/BOLA/no-store                 | `tests/integration/http-boundaries.test.ts`                                         |
-| 真实 15 题、刷新恢复、无 Web Storage、paywall、full reload | `tests/e2e/funnel.spec.ts`                                                          |
+| 场景                                                          | 测试位置                                                                            |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| BMI、极端/缺失/非法身高体重年龄、目标方向                     | `tests/unit/health-assessment-v1.test.ts`                                           |
+| 预测日期边界、维护目标、超长 horizon                          | `tests/unit/result-projection.test.ts`、`tests/unit/health-assessment-v1.test.ts`   |
+| 分步保存、恢复、乱序、重复、并发 revision                     | `tests/integration/persistence-api.test.ts`、`tests/integration/funnel-api.test.ts` |
+| 非会员脱敏、会员完整、受保护字段递归扫描                      | `tests/integration/access-payment-api.test.ts`                                      |
+| `demo_readonly` fixture 可读、create/save/submit/pay 全部拒写 | `tests/integration/access-payment-api.test.ts`                                      |
+| `/pay` 状态变化、幂等 replay、支付后 full                     | `tests/integration/access-payment-api.test.ts`                                      |
+| session/cookie/Bearer/origin/BOLA/no-store                    | `tests/integration/http-boundaries.test.ts`                                         |
+| 真实 15 题、刷新恢复、无 Web Storage、paywall、full reload    | `tests/e2e/funnel.spec.ts`                                                          |
 
 ## 有意未覆盖
 

@@ -2,12 +2,12 @@
 
 > 交付日期：2026-09-22 · 版本基线：`main`
 
-这是本次全栈挑战的验收入口。所有健康数据均为合成 demo 数据；浏览器 session 使用 HttpOnly Cookie，URL 不承载 bearer credential、支付凭证或健康数值。
+这是项目的 release verification package。所有健康数据均为合成数据；浏览器 session 使用 HttpOnly Cookie，URL 不承载 bearer credential、支付凭证或健康数值。
 
 ## 线上与仓库
 
 - 公网演示：https://health-assessment-funnel.vercel.app
-- 付费入口快速调试：https://health-assessment-funnel.vercel.app/demo/paywall（固定 Mock 数据，不写入 Supabase）
+- 付费入口快速调试：https://health-assessment-funnel.vercel.app/demo/paywall（固定 preview 数据，不写入 Supabase）
 - GitHub：https://github.com/RomanticD/health-assessment-funnel
 - 健康检查：https://health-assessment-funnel.vercel.app/api/health
 - 设计/产品复审：[plan/16-p0-product-review.md](../plan/16-p0-product-review.md)
@@ -28,24 +28,24 @@
 https://health-assessment-funnel.vercel.app/demo/paywall
 ```
 
-这个页面使用固定的合成 Mock 数据，打开后会显示 `YOUR PERSONAL PLAN` 和 `Unlock your full summary`。点击后可以直接检查弹窗，再点击 `Unlock full summary — free demo` 查看完整结果布局。它只验证前端交互，不创建 session、不调用支付接口，也不会修改 Supabase；真实后端闭环仍按上面的 5 分钟路径或 paid session 验收。
+这个页面使用固定的合成 preview 数据，打开后会显示 `YOUR PERSONAL PLAN` 和 `Unlock your full summary`。点击后可以直接检查弹窗，再点击 `Unlock full summary — free demo` 查看完整结果布局。它只验证前端交互，不创建 session、不调用支付接口，也不会修改 Supabase；真实后端闭环仍按上面的 5 分钟路径或 pre-authorized session 验证。
 
-## 已支付 demo session（只读 fixture）
+## 已支付 session（只读 fixture）
 
-这是题目要求的可重放合成凭证，不是 Supabase key，也不应被用于真实用户。它由 `demo_readonly` 数据库角色绑定，所有保存、提交、支付写入都会在事务 RPC 层拒绝。
+这是可重放的合成凭证，不是 Supabase key，也不应被用于真实用户。它由 `demo_readonly` 数据库角色绑定，所有保存、提交、支付写入都会在事务 RPC 层拒绝。
 
 ```text
-sessionId:   Uav5FgH_vRvjSAe1KvV6lWjUGaVO1-aZXfCXfzxGNiQ
-assessmentId: 99497ec4-9e5b-4b6a-a15d-e153323baf2b
-expiresAt:   2026-09-29T02:27:15Z
+sessionId:   Cm4dsRc3ybdSeNc3CPYuHVumgLi4HLQ6lnWy_s0eOAY
+assessmentId: 2378aded-3fab-4ed5-a958-ac73d09dddad
+expiresAt:   2026-10-22T11:46:35Z
 ```
 
 读取完整结果：
 
 ```bash
 export BASE_URL=https://health-assessment-funnel.vercel.app
-export SESSION_ID='Uav5FgH_vRvjSAe1KvV6lWjUGaVO1-aZXfCXfzxGNiQ'
-export ASSESSMENT_ID='99497ec4-9e5b-4b6a-a15d-e153323baf2b'
+export SESSION_ID='Cm4dsRc3ybdSeNc3CPYuHVumgLi4HLQ6lnWy_s0eOAY'
+export ASSESSMENT_ID='2378aded-3fab-4ed5-a958-ac73d09dddad'
 
 curl --fail-with-body "$BASE_URL/api/v1/assessments/$ASSESSMENT_ID/result" \
   -H "Authorization: Bearer $SESSION_ID" | jq
@@ -81,8 +81,8 @@ curl --fail-with-body "$BASE_URL/api/v1/assessments/$ASSESSMENT_ID/result" \
 - 结果 URL 可以包含 assessment UUID，但 UUID 不是授权凭证；服务端仍要求当前浏览器的 HttpOnly session。
 - 新浏览器或无 Cookie 复制链接时，结果接口返回统一的 session-required / private-session 文案，不能读取健康数据。
 - `sessionId`、`order`、支付幂等 key、订阅状态、年龄、身高、体重和完整答案不进入 URL、localStorage 或 sessionStorage。
-- 若未来需要跨设备分享，应新增短期、一次性、可撤销的 signed resume token；本 demo 不用 assessment UUID 冒充授权。
+- 若未来需要跨设备分享，应新增短期、一次性、可撤销的 signed resume token；本产品不使用 assessment UUID 冒充授权。
 
 ## 已知边界
 
-这是教育性 wellness demo，不是医疗诊断或真实收费产品。目标日期和热量是服务端估算，不能替代医生或注册营养师意见；公开 paid fixture 是合成只读数据，按到期时间轮换。
+这是一个 wellness 产品预览，不是医疗诊断或真实收费产品。目标日期和热量是服务端估算，不能替代医生或注册营养师意见；公开 paid fixture 是合成只读数据，按到期时间轮换。

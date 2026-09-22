@@ -60,8 +60,10 @@ test('personal quiz saves each answer, restores measurements, edits and unlocks 
   await expect(page.getByRole('spinbutton')).toHaveValue('32')
   await page.getByRole('button', { name: 'Continue →' }).click()
   await expect(page).toHaveURL(/\/quiz\/review$/)
-  await page.getByRole('button', { name: 'See my personal summary →' }).click()
-  await expect(page).toHaveURL(/\/results\/[0-9a-f-]+$/)
+  await Promise.all([
+    page.waitForURL(/\/results\/[0-9a-f-]+$/, { timeout: 20_000 }),
+    page.getByRole('button', { name: 'See my personal summary →' }).click(),
+  ])
   expect(page.url()).not.toMatch(/sessionId|token|pay|order|age|height|weight/i)
   await expect(page.getByRole('heading', { name: 'Here’s your wellness profile' })).toBeVisible()
   await expect(page.getByText('15 minutes', { exact: true })).toBeVisible()

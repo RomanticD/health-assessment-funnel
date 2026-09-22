@@ -96,6 +96,21 @@ export class HealthAssessmentService {
     expectedRevision: number
     idempotencyKey: string
   }) {
+    // Submission performs a read-before-calculate so the domain layer can
+    // build the result payload. Resolve the session's write capability before
+    // that read; otherwise a public read-only fixture could receive a generic
+    // 404 for an unknown assessment instead of the stable write denial that
+    // every other mutation path returns.
+    const session = await this.store.resolveSession(input.sessionDigest)
+    if (session.userKind === 'demo_readonly') {
+      throw new ApplicationError({
+        status: 403,
+        code: 'DEMO_SESSION_READ_ONLY',
+        title: 'Demo session is read-only',
+        detail: 'The public paid fixture cannot be changed.',
+      })
+    }
+
     const requestHash = requestFingerprint({
       method: 'POST',
       scope: 'assessment:submit',

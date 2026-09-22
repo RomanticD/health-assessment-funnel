@@ -99,3 +99,15 @@ P1：ACL/default privileges 要到可执行级；函数空 search path/全限定
 ## Post-review preflight update
 
 用户完成授权后，GitHub CLI OAuth 已成功，private `RomanticD/health-assessment-funnel` 已创建并推送；Docker 24.0.6 与 Vercel team `romanticds-projects` 也已确认。原 review 的外部阻塞记录保留为审计历史，不再代表当前 GitHub/Docker 状态。
+
+## Final implementation review (2026-09-22)
+
+按用户要求再次发起了 requirements、plan 和 CI/Playwright 三个只读审查方向。CI/Playwright reviewer 完成了 workflow、test stack 和最近运行记录核对；requirements/plan reviewer 在初步扫描后触发 agent usage limit，因此其发现只作为待核实线索，未被包装成独立通过结论。主 agent 随后逐项复核并修复：
+
+- 公开 fixture 从 `standard` 轮换为独立 `demo_readonly`，并在线验证 full read 与四类 mutation 的 `403 DEMO_SESSION_READ_ONLY`。
+- 补齐 funnel GET/PUT OpenAPI 合约，修正 submit/pay 的实际 200 状态码。
+- submit 的 read-before-write 路径增加 writable session guard，避免 read-only fixture 因未知 assessment 得到误导性 404。
+- CI Playwright job 总是上传 report/results，CI 将 flaky test 视为失败；E2E 改为事件驱动导航等待。fresh stack 本地结果为 47 unit、21 integration、2 Chromium E2E 全通过。
+- 根 README 已切换为真实产品定位；最终证据见 [`delivery/evidence/final-multi-agent-review.md`](../delivery/evidence/final-multi-agent-review.md)。
+
+仍未将计划中偏生产运营的 fixture rotation CLI、cleanup dry-run、advisor/ACL/type-drift 自动门禁和真实支付 provider webhook 伪称为完成；它们记录为 release 后强化项，不影响原始挑战的核心验收闭环。
