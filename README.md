@@ -124,6 +124,7 @@ erDiagram
 - [src/server/README.md](./src/server/README.md)：后端模块、认证、并发和扩展点
 - [supabase/README.md](./supabase/README.md)：迁移、连接、权限模型与数据库操作
 - [docs/api.md](./docs/api.md)：API 合约与完整 cURL 演示
+- [docs/openapi.yaml](./docs/openapi.yaml)：可导入工具的 OpenAPI 3.1 合约
 - [docs/database.md](./docs/database.md)：Schema、ERD 与数据库不变量
 - [docs/deployment.md](./docs/deployment.md)：Supabase/Vercel/CI 部署与回滚
 - [docs/ai-retrospective.md](./docs/ai-retrospective.md)：AI 协作方法、验证证据和一次明确否决

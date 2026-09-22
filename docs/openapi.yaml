@@ -221,8 +221,6 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/PreviewResultEnvelope'
                   - $ref: '#/components/schemas/FullResultEnvelope'
-                discriminator:
-                  propertyName: access
         '401': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
         '409': { $ref: '#/components/responses/Problem' }
@@ -358,31 +356,53 @@ components:
       properties:
         data: { $ref: '#/components/schemas/AssessmentMutation' }
     AssessmentProgress:
-      allOf:
-        - $ref: '#/components/schemas/AssessmentMutation'
-        - type: object
-          required: [quizVersion, answers]
+      type: object
+      additionalProperties: false
+      required:
+        - assessmentId
+        - status
+        - quizVersion
+        - revision
+        - completedSteps
+        - nextStep
+        - answers
+        - updatedAt
+      properties:
+        assessmentId: { type: string, format: uuid }
+        status: { type: string, enum: [draft, ready, completed] }
+        quizVersion: { const: health-v1 }
+        revision: { type: integer, minimum: 0 }
+        completedSteps:
+          type: array
+          maxItems: 4
+          items: { $ref: '#/components/schemas/StepKey' }
+        nextStep: { $ref: '#/components/schemas/NextStep' }
+        answers:
+          type: object
+          additionalProperties: false
           properties:
-            quizVersion: { const: health-v1 }
-            answers:
+            sex:
               type: object
               additionalProperties: false
+              required: [sexForCalorieEstimation]
               properties:
-                sex:
-                  type: object
-                  properties:
-                    sexForCalorieEstimation: { type: string, enum: [female, male] }
-                goal:
-                  type: object
-                  properties:
-                    primaryGoal: { type: string, enum: [lose_weight, maintain_weight, gain_weight] }
-                body:
-                  $ref: '#/components/schemas/BodyStepData'
-                activity:
-                  type: object
-                  properties:
-                    activityLevel:
-                      { type: string, enum: [sedentary, light, moderate, active, very_active] }
+                sexForCalorieEstimation: { type: string, enum: [female, male] }
+            goal:
+              type: object
+              additionalProperties: false
+              required: [primaryGoal]
+              properties:
+                primaryGoal: { type: string, enum: [lose_weight, maintain_weight, gain_weight] }
+            body:
+              $ref: '#/components/schemas/BodyStepData'
+            activity:
+              type: object
+              additionalProperties: false
+              required: [activityLevel]
+              properties:
+                activityLevel:
+                  { type: string, enum: [sedentary, light, moderate, active, very_active] }
+        updatedAt: { $ref: '#/components/schemas/Timestamp' }
     AssessmentProgressEnvelope:
       type: object
       additionalProperties: false

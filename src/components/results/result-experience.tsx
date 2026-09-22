@@ -52,6 +52,8 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
   const [isPaying, setIsPaying] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
   const paymentKeyRef = useRef<string | null>(null)
+  const openDialog = useCallback(() => setIsDialogOpen(true), [])
+  const closeDialog = useCallback(() => setIsDialogOpen(false), [])
 
   const loadResult = useCallback(async () => {
     setIsLoading(true)
@@ -87,7 +89,7 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
       const refreshed = await getAssessmentResult(assessmentId)
       setResult(refreshed.data)
       paymentKeyRef.current = null
-      setIsDialogOpen(false)
+      closeDialog()
     } catch (error) {
       setPaymentError(resultErrorMessage(error))
     } finally {
@@ -170,7 +172,7 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
         </section>
 
         {result.access === 'preview' ? (
-          <PreviewResult result={result} onUnlock={() => setIsDialogOpen(true)} />
+          <PreviewResult result={result} onUnlock={openDialog} />
         ) : (
           <FullResult result={result} />
         )}
@@ -182,7 +184,7 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
         open={isDialogOpen}
         isPaying={isPaying}
         error={paymentError}
-        onClose={() => setIsDialogOpen(false)}
+        onClose={closeDialog}
         onConfirm={() => void unlockResult()}
       />
     </main>

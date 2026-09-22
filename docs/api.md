@@ -73,7 +73,7 @@ Body：`{}`。在同一事务中验证完整输入与 revision、计算结果、
     "bmi": 25.7,
     "bmiCategory": "overweight",
     "summary": "A gradual plan is recommended.",
-    "calorieRange": { "min": 1451, "max": 1651 },
+    "calorieRange": { "min": 1500, "max": 1700 },
     "warnings": [],
     "upgradeRequired": true,
     "lockedFeatures": [
