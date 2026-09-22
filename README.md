@@ -10,7 +10,31 @@
 - GitHub：<https://github.com/RomanticD/health-assessment-funnel>（private）
 - 健康检查：<https://health-assessment-funnel.vercel.app/api/health>
 - Supabase project ref：`kfyqgzuatywmsuruwsei`
-- Paid demo session：将在生产全链路验收后写入此处，并同时给出对应 `assessmentId`。
+- Paid demo session（已完成 15 题、已提交、已激活 mock subscription）：
+  - `sessionId`: `Uav5FgH_vRvjSAe1KvV6lWjUGaVO1-aZXfCXfzxGNiQ`
+  - `assessmentId`: `99497ec4-9e5b-4b6a-a15d-e153323baf2b`
+  - 有效期至：`2026-09-29T02:27:15Z`（7 天匿名 session TTL）
+
+使用下面的只读请求即可查看完整会员结果；同一个 assessment 不带这个 session 或使用未支付 session 时，结果接口只返回 `access: "preview"` 和 `lockedFeatures`。
+
+```bash
+BASE="https://health-assessment-funnel.vercel.app"
+SESSION_ID="Uav5FgH_vRvjSAe1KvV6lWjUGaVO1-aZXfCXfzxGNiQ"
+ASSESSMENT_ID="99497ec4-9e5b-4b6a-a15d-e153323baf2b"
+
+curl "$BASE/api/v1/assessments/$ASSESSMENT_ID/result" \
+  -H "Authorization: Bearer $SESSION_ID"
+```
+
+要在自己的 session 上重放支付闭环，先完成并提交 assessment，然后调用（`Idempotency-Key` 每次请求使用 16–128 位稳定值）：
+
+```bash
+curl -X POST "$BASE/api/v1/pay" \
+  -H "Authorization: Bearer $SESSION_ID" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: demo-payment-20260922" \
+  --data '{"assessmentId":"'"$ASSESSMENT_ID"'","planCode":"demo_monthly"}'
+```
 
 ## 体验路径
 
