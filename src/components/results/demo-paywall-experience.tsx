@@ -93,14 +93,11 @@ export function DemoPaywallExperience() {
       {!isFull && <PreviewUnlockRail onUnlock={() => setIsDialogOpen(true)} />}
       <div className="result-wrap result-editorial demo-paywall-wrap">
         <header className="result-heading">
-          <p className="eyebrow">PAYWALL UI TEST · FIXED MOCK DATA</p>
-          <h1>Preview the unlock moment.</h1>
-          <p>
-            This private-looking harness is for product review only. It uses fixed values and never
-            writes to Supabase.
-          </p>
+          <p className="eyebrow">YOUR WELLNESS PROFILE</p>
+          <h1>Here’s your wellness profile</h1>
+          <p>A preview of your personal summary. Nothing is charged in this demo.</p>
           <span className={isFull ? 'access-badge access-badge--full' : 'access-badge'}>
-            {isFull ? 'Mock full summary' : 'Mock free preview'}
+            {isFull ? 'Your full summary' : 'Your free preview'}
           </span>
         </header>
 

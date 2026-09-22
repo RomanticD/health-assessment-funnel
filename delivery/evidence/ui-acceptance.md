@@ -6,7 +6,11 @@
 - `Move with intention · Build your rhythm · Feel more like yourself` 背景条全宽铺开。
 - 题目选项使用统一圆形 indicator（加号/箭头/勾选同一中心），点击有下压和内阴影；单选保存立即切换到下一题，网络期间保留忙状态。
 - 结果页改为 BetterMe 风格的信息叙事：BMI 横向刻度、个人画像行、能量 editorial rows、宽幅渐变面积曲线与目标标签。
-- preview 结果页底部固定显示 `DEMO CHECKOUT · $0` 和解锁入口，内容内仍保留完整 paywall；modal 明确无真实扣款。
+
+* preview 结果页顶部 sticky 显示 `YOUR PERSONAL PLAN` 和解锁入口，内容内仍保留完整 paywall；modal 明确无真实扣款。
+
+- preview 用不含真实受保护字段的毛玻璃占位展示锁定 energy/timeline/progress；full 状态移除占位并展示真实 rows 与动画曲线。
+- full 状态显示 private session 已保存和 assessment reference，说明 reference 不是登录凭证。
 - 提供 `/demo/paywall` 固定 Mock 调试路由，无需填写 15 题即可检查 preview → modal → full 的交互。
 - 曲线支持绘制动画，`prefers-reduced-motion: reduce` 时直接显示完整图形。
 

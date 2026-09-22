@@ -102,7 +102,9 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
       paymentKeyRef.current = null
       closeDialog()
     } catch (error) {
-      setPaymentError(resultErrorMessage(error))
+      setPaymentError(
+        `${resultErrorMessage(error)} If the demo checkout completed, retrying is safe.`,
+      )
     } finally {
       setIsPaying(false)
     }
@@ -173,6 +175,7 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
         )}
 
         {preferences?.experience && <RoutineSummary answers={preferences} />}
+        {result.access === 'full' && <SessionReceipt assessmentId={assessmentId} />}
 
         <EducationalFooter />
       </div>
@@ -194,12 +197,12 @@ export function PreviewUnlockRail({ onUnlock }: { onUnlock: () => void }) {
   return (
     <aside className="preview-unlock-rail" aria-label="Unlock your full summary">
       <div className="preview-unlock-rail-copy">
-        <p className="eyebrow">DEMO CHECKOUT · $0</p>
-        <strong>Your full summary is ready</strong>
-        <span>See your daily energy guide and estimated timeline.</span>
+        <p className="eyebrow">YOUR PERSONAL PLAN</p>
+        <strong>Your complete roadmap is ready</strong>
+        <span>See the details that make your next steps feel personal.</span>
       </div>
       <button className="primary-action" type="button" onClick={onUnlock}>
-        Unlock full summary
+        Unlock your full summary
         <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
           <path d="m7.5 4.5 5 5-5 5" />
         </svg>
@@ -344,21 +347,57 @@ export function PreviewResult({
 
       <Warnings warnings={result.warnings} />
 
+      <section className="locked-detail-preview" aria-labelledby="locked-preview-title">
+        <div className="locked-detail-preview-copy">
+          <p className="eyebrow">YOUR FULL SUMMARY</p>
+          <h2 id="locked-preview-title">See the details that make the plan yours.</h2>
+          <p>
+            Unlock a clearer daily rhythm, a gentle direction, and the progress outlook behind it.
+          </p>
+        </div>
+        <div className="locked-detail-preview-visual">
+          <div className="locked-detail-lines" aria-hidden="true">
+            <div>
+              <span>Daily energy target</span>
+              <strong>•••••• kcal</strong>
+            </div>
+            <div>
+              <span>Estimated timeline</span>
+              <strong>•••• ••••</strong>
+            </div>
+            <div>
+              <span>Progress outlook</span>
+              <strong>••••••••</strong>
+            </div>
+          </div>
+          <div className="locked-detail-overlay">
+            <span className="paywall-lock" aria-hidden="true">
+              <svg viewBox="0 0 28 28" focusable="false">
+                <path d="M9.5 12V8.75a4.5 4.5 0 0 1 9 0V12M7 12h14v11H7z" />
+              </svg>
+            </span>
+            <strong>Your timeline is ready to unlock</strong>
+            <small>Your preview stays available.</small>
+          </div>
+        </div>
+      </section>
+
       <section className="paywall-callout" aria-labelledby="locked-title">
         <div className="paywall-callout-copy">
-          <p className="eyebrow">DEMO CHECKOUT · $0</p>
+          <p className="eyebrow">YOUR PERSONAL PLAN</p>
           <h2 id="locked-title">Unlock the complete picture.</h2>
           <p>
             See the rest of your personal profile in this free demo. Nothing is charged and your
             preview stays available if you choose not to continue.
           </p>
           <ul>
+            <li className="paywall-list-heading">What’s included</li>
             {lockedFeatures.map((label) => (
               <li key={label}>{label}</li>
             ))}
           </ul>
           <button className="primary-action" type="button" onClick={onUnlock}>
-            Explore my full summary
+            See your full summary
             <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
               <path d="m7.5 4.5 5 5-5 5" />
             </svg>
@@ -371,7 +410,7 @@ export function PreviewResult({
               <path d="M9.5 12V8.75a4.5 4.5 0 0 1 9 0V12M7 12h14v11H7z" />
             </svg>
           </span>
-          <strong>Your full plan</strong>
+          <strong>Your full summary</strong>
           <span>Ready when you are</span>
         </div>
       </section>
@@ -562,6 +601,40 @@ function Warnings({ warnings }: { warnings: HealthWarningCode[] }) {
           <p>{WARNING_LABELS[warning]}</p>
         </div>
       ))}
+    </section>
+  )
+}
+
+export function SessionReceipt({ assessmentId }: { assessmentId: string }) {
+  const [copied, setCopied] = useState(false)
+
+  async function copyReference() {
+    try {
+      await navigator.clipboard.writeText(assessmentId)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1800)
+    } catch {
+      setCopied(false)
+    }
+  }
+
+  return (
+    <section className="session-receipt" aria-label="Saved private session">
+      <div>
+        <p className="eyebrow">YOUR PRIVATE SESSION</p>
+        <h2>Your full summary is saved.</h2>
+        <p>
+          Return to this result on the same browser while your private session is active. Your
+          assessment reference is safe to keep, but it is not a login credential.
+        </p>
+      </div>
+      <div className="session-reference">
+        <span>Assessment reference</span>
+        <code>{assessmentId.slice(0, 8).toUpperCase()} ·••••</code>
+        <button className="secondary-action" type="button" onClick={() => void copyReference()}>
+          {copied ? 'Copied reference' : 'Copy reference'}
+        </button>
+      </div>
     </section>
   )
 }

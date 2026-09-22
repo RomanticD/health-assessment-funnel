@@ -15,8 +15,8 @@
 ## 评审者 5 分钟路径
 
 1. 打开公网链接，点击 `Find my starting point`，完成 15 道题。
-2. 结果页先展示可读的免费预览；首屏底部固定出现 `DEMO CHECKOUT · $0` 和 `Unlock full summary`，内容内也保留 `Explore my full summary`，无需猜测付费入口。
-3. 打开弹窗，确认 `No card · No charge · No renewal`，点击 `Unlock my summary — free demo`。
+2. 结果页先展示可读的免费预览；顶部 sticky 入口显示 `YOUR PERSONAL PLAN` 和 `Unlock your full summary`，内容内也保留 `See your full summary`，无需猜测付费入口。
+3. 打开弹窗，确认 `No card · No charge · No renewal`，点击 `Unlock full summary — free demo`。
 4. 支付后页面重新读取结果，徽标变为 `Your full summary`，出现完整能量数值和带绘制动画的目标曲线。
 5. 刷新结果页，full entitlement 仍然有效。
 
@@ -28,7 +28,7 @@
 https://health-assessment-funnel.vercel.app/demo/paywall
 ```
 
-这个页面使用固定的合成 Mock 数据，打开后底部会固定显示 `DEMO CHECKOUT · $0` 和 `Unlock full summary`。点击后可以直接检查弹窗，再点击 `Unlock my summary — free demo` 查看完整结果布局。它只验证前端交互，不创建 session、不调用支付接口，也不会修改 Supabase；真实后端闭环仍按上面的 5 分钟路径或 paid session 验收。
+这个页面使用固定的合成 Mock 数据，打开后会显示 `YOUR PERSONAL PLAN` 和 `Unlock your full summary`。点击后可以直接检查弹窗，再点击 `Unlock full summary — free demo` 查看完整结果布局。它只验证前端交互，不创建 session、不调用支付接口，也不会修改 Supabase；真实后端闭环仍按上面的 5 分钟路径或 paid session 验收。
 
 ## 已支付 demo session（只读 fixture）
 

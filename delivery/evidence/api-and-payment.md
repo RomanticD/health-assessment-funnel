@@ -12,15 +12,17 @@
 
 ```text
 完成 15 题 → submit → preview
-    ↓ Explore my full summary
-UpgradeDialog（DEMO CHECKOUT · $0）
-    ↓ Unlock my summary — free demo
+    ↓ See your full summary
+UpgradeDialog（YOUR PERSONAL PLAN）
+    ↓ Unlock full summary — free demo
 POST /api/v1/pay
     ↓ 重新 GET result
 Your full summary + 完整 energy/timeline
 ```
 
-`src/components/results/result-experience.tsx` 的 `PreviewResult` 将入口放在结果页首段之后，`UpgradeDialog` 负责可访问的 focus trap、Escape、取消与重试。付款失败时仍保留 preview，不伪造成功。
+`src/components/results/result-experience.tsx` 在结果页顶部提供 sticky 解锁入口，`PreviewResult` 内保留完整 paywall；`UpgradeDialog` 负责可访问的 focus trap、Escape、取消与重试。付款失败时仍保留 preview，不伪造成功。
+
+`POST /api/v1/pay` 通过事务 RPC 写入 `subscriptions` 与不可变 `payment_events`，前端支付成功后重新读取 result；full 页面显示“已保存到 private session”和 assessment reference。匿名 session 仍由 HttpOnly Cookie 绑定，reference 不是 bearer credential；同一浏览器刷新可再次读取，跨设备恢复需要未来新增可撤销的 signed resume token 或账号体系。
 
 ## 可重放 cURL
 

@@ -46,7 +46,7 @@ Landing
   → 创建/恢复匿名 session
   → 15 个逐题保存的问题（目标、经验、习惯、偏好、身体数据）
   → review + 服务端计算
-  → preview（无敏感预测字段）
+  → preview（无敏感预测字段 + 毛玻璃锁定预览）
   → mock pay
   → full result（即时解锁）
 ```
