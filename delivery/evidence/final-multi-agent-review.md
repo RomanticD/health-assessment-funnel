@@ -39,6 +39,8 @@ pnpm test:stack
 
 本地 fresh stack 验证结果：47 unit tests、21 integration tests、2 Chromium E2E tests 均通过；最近一次 E2E 首次运行没有 retry/flaky。
 
+修订 commit `6306d97` 的远端 run `35724751307` 中，quality job 已通过，integration 的 21 个 API tests 也已通过；唯一失败是 Chromium 首条测试在 CI 冷启动时超过 Playwright 默认 30 秒总测试预算，retry 后业务断言通过。为保留 `failOnFlakyTests` 的严格策略，已将 CI E2E 总预算提高到 60 秒，而不是允许 flaky 通过；本地复跑仍为首次 2/2 通过。
+
 ## 仍属于计划中的生产强化项
 
 以下项目不是原始挑战的必交功能，当前没有被伪称为已完成：可自动 rotate 的线上 fixture CLI、自动 cleanup dry-run、自动 advisor/ACL/type-drift 检查和真实支付 provider webhook。当前通过 forward-only migrations、Supabase 手工受控 provisioning、文档化 runbook 和 CI 核心门禁覆盖；如果进入长期生产运营，应继续补齐这些运维自动化。
