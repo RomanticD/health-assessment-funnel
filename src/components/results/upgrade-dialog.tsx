@@ -106,8 +106,8 @@ export function UpgradeDialog({
         <p className="eyebrow">YOUR PERSONAL PLAN</p>
         <h2 id="upgrade-title">Unlock the complete picture.</h2>
         <p id="upgrade-description">
-          Your free preview is ready. Unlock the rest of your personal profile for this session — no
-          payment is collected in this demo.
+          Your preview is ready. Unlock the rest of your personal profile for this session. No
+          payment is collected here.
         </p>
 
         <ul className="unlock-list">
@@ -121,7 +121,7 @@ export function UpgradeDialog({
         </ul>
 
         <div className="demo-price">
-          <span>Demo checkout</span>
+          <span>Checkout</span>
           <strong>$0</strong>
           <small>No card. No charge. No renewal.</small>
         </div>
@@ -139,7 +139,7 @@ export function UpgradeDialog({
           onClick={onConfirm}
           disabled={isPaying}
         >
-          {isPaying ? 'Opening your summary…' : 'Unlock full summary — free demo'}
+          {isPaying ? 'Opening your summary…' : 'Unlock full summary — no charge'}
         </button>
         <button className="secondary-action secondary-action--full" type="button" onClick={onClose}>
           Keep the free preview

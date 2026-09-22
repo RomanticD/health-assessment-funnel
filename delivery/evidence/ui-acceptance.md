@@ -11,7 +11,7 @@
 
 - preview 用不含真实受保护字段的毛玻璃占位展示锁定 energy/timeline/progress；full 状态移除占位并展示真实 rows 与动画曲线。
 - full 状态显示 private session 已保存和 assessment reference，说明 reference 不是登录凭证。
-- 提供 `/demo/paywall` 固定 Mock 调试路由，无需填写 15 题即可检查 preview → modal → full 的交互。
+- 提供 `/demo/paywall` 固定合成结果入口，无需填写 15 题即可检查 preview → modal → full 的交互。
 - 曲线支持绘制动画，`prefers-reduced-motion: reduce` 时直接显示完整图形。
 
 ## 参考图（用户提供）
@@ -28,6 +28,6 @@
 - Landing / header / values：`src/app/page.tsx`、`src/components/site-header.tsx`、`src/app/studio.css`
 - 15 题交互：`src/components/quiz/personal-quiz.tsx`
 - preview/paywall/full/chart：`src/components/results/result-experience.tsx`、`src/components/results/demo-paywall-experience.tsx`、`src/components/results/upgrade-dialog.tsx`
-- 浏览器验收：`tests/e2e/funnel.spec.ts`（包含固定 Mock paywall URL）
+- 浏览器验收：`tests/e2e/funnel.spec.ts`（包含固定结果入口）
 
 E2E 会写出 `landing-mobile.png`、`question-mobile.png`、`result-mobile.png` 到 Playwright artifact；交付目录保留参考图与验收说明，避免把带 session 的线上截图或 token 写进仓库。

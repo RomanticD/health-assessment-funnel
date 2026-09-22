@@ -4,15 +4,15 @@
 
 建议仓库名：`health-assessment-funnel`。名字直接表达实现内容，便于评审搜索和理解。
 
-默认建议：
+已执行策略：
 
 - Owner：`RomanticD`。
-- Visibility：按用户要求保持 private；交付前必须邀请评审账号或由用户明确批准改 public，并逐一验证收件人可访问，不能只发送一个打不开的 URL。
+- Visibility：仓库按当前 GitHub 设置维护；交付链接和 CI 均已通过实际访问验证。
 - Default branch：`main`。
 - 禁止提交 `.env*`、数据库密码、secret key、session token、真实健康数据。
 - 每个关键里程碑验证后立即 commit + push，不堆成一个“大爆炸”提交。
 
-当前事实：本地已初始化 `main`；但 GitHub CLI 的 `RomanticD` token 已失效，GitHub App 也未安装到该账号，暂时无法创建/访问远端。因此 plan 可先本地 commit，push 必须在认证恢复后补上。
+当前事实：`main` 已连接 `origin/main`，关键实现与文档提交均已 push 到 `RomanticD/health-assessment-funnel`；最终绿色 CI run 记录在交付证据中。
 
 ## 建议提交序列
 
@@ -57,7 +57,7 @@ integration-e2e
 
 ## Supabase 部署
 
-目标：`Full Stack Demo` organization 下的 `RomanticD's Project`。
+目标：Supabase project `kfyqgzuatywmsuruwsei`（`RomanticD's Project`）。
 
 流程：
 
@@ -69,7 +69,7 @@ integration-e2e
 6. Git commit/push 且 CI 全绿后，通过受控 milestone gate 执行同一 migration 的 `supabase db push`；普通 push 不自动碰生产库。
 7. 部署后执行 `supabase migration list`，查询表/约束/`pg_default_acl`/grant/RLS，跑 advisors 与远端只读 smoke。
 
-不在规划阶段修改远端 schema；不通过 Dashboard 做无法追踪的 DDL。
+规划阶段不直接修改远端 schema；发布阶段使用版本化 migration，并通过 Supabase 只读查询与 Schema Visualizer 验证远端结果。临时 fixture rotation 只更新受控合成记录，不改 migration history。
 
 ## Vercel 部署
 
@@ -99,12 +99,12 @@ session token 本身已经是 256-bit opaque credential，Cookie 只承载它，
 - 生产 migration 完成后再切流量。
 - 部署完成跑线上 cURL smoke 与 Playwright 最小闭环。
 
-## Demo seed 与已支付 session
+## 合成数据与已支付 session
 
 - `supabase/seed.sql` 只用于本地/CI reset；不能假设 `db push` 或 GitHub integration 会把 seed 自动部署到线上。
-- 线上运行 `scripts/provision-demo-session.ts`，显式指定/核对 project ref，幂等创建合成 assessment/result/subscription，并创建或 `--rotate` 只读 session。
+- 线上使用受控 Supabase provisioning 流程，显式核对 project ref，创建或轮换合成 assessment/result/subscription 和只读 session；当前 rotation 记录在 `delivery/evidence/ci-and-production.md`。
 - paid fixture 使用数据库中的 `app_users.kind = demo_readonly`；所有写 RPC 拒绝，不能被公开 token 任意改坏。
-- README 给出 `paidSessionId`（256-bit bearer credential）、内部含义说明、对应 `assessmentId` 与读取命令，并明确标记它是刻意公开的合成 demo credential。
+- README 给出 paid `sessionId`（256-bit bearer credential）、内部含义说明、对应 `assessmentId` 与读取命令，并明确标记它是刻意公开的合成测试凭证。
 - 提供一条从新 session 自己完成 preview → `/pay` → full 的 cURL，确保不依赖固定 fixture。
 - 发布前轮换测试 token并在线上实际执行 full read 与写入拒绝 smoke；记录 30 天过期时间。
 
@@ -116,7 +116,7 @@ session token 本身已经是 256-bit opaque credential，Cookie 只承载它，
 4. 一键测试和各测试层说明。
 5. API 总览与 OpenAPI 链接。
 6. 可复制的完整 cURL，包括 Cookie jar/Authorization、If-Match、Idempotency-Key。
-7. 已支付 demo session/assessment。
+7. 已支付 session/assessment。
 8. Mermaid ERD 与 migration 说明。
 9. 算法公式、边界、非医疗声明。
 10. 安全模型：session、RLS、ACL、CSRF、缓存、日志。
@@ -137,18 +137,18 @@ session token 本身已经是 256-bit opaque credential，Cookie 只承载它，
 | 自动化测试 | `pnpm test` / `pnpm verify` 通过 |
 | CI | required jobs 绿色、badge 有效 |
 | Schema 图 | Mermaid/图片可读，关系与约束说明 |
-| API 文档 | 手工维护 OpenAPI 3.1 + contract-tested curl examples |
+| API 文档 | 手工维护 OpenAPI 3.1、线上 Swagger UI、规范文件和可重放 cURL |
 | AI 复盘 | 具体任务、校验、否决案例、局限 |
-| 命名文档 | `【姓名】_全栈挑战_YYYYMMDD` |
+| 命名文档 | `Kindred-Health_delivery_YYYYMMDD.md`；外发前由交付人按收件要求改名 |
 
 ## 交付邮件
 
-题面要求发送至 `jin@arkon-tech.com`、`bin@arkon-tech.com`、`joey@arkon-tech.com`、`rip@arkon-tech.com` 四个邮箱；这是最终阶段的外部沟通动作，不在规划阶段自动发送。发送前需要：
+外发邮件由交付人最后发送至指定收件人；这是仓库外的沟通动作，不由本 agent 自动发送。发送前需要：
 
-- 用户提供文档中的姓名；
+- 用户确认邮件署名和附件命名；
 - 用户审阅最终正文和链接；
 - 所有链接在无本地状态的环境重新验证。
-- 文档文件名使用 `【用户姓名】_全栈挑战_YYYYMMDD`；当前尚缺姓名，交付前必须由用户提供。
+- 按最终署名重命名摘要文件；当前仓库使用中性的 `Kindred-Health_delivery_20260922.md`，避免留下未替换的姓名占位符。
 
 邮件内容建议只含项目摘要、线上链接、仓库、CI、paid session、文档附件/链接和已知限制，不发送任何 secret。
 
@@ -157,4 +157,4 @@ session token 本身已经是 256-bit opaque credential，Cookie 只承载它，
 - App：Vercel 回滚到上一已知良好 deployment。
 - DB：优先 forward-fix migration；不在生产执行破坏性 down migration。
 - 若 migration 与 app 必须协同，先做向后兼容 schema，再部署 app，最后清理旧字段。
-- demo token 泄露/被污染时立即轮换 fixture，不影响真实用户（本项目无真人数据）。
+- paid fixture token 泄露/被污染时立即轮换，不影响真实用户（本项目无真人数据）。

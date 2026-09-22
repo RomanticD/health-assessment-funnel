@@ -1,0 +1,735 @@
+openapi: 3.1.0
+info:
+  title: Health Assessment Funnel API
+  version: 1.0.0
+  description: Versioned anonymous health assessment, entitlement and mock-payment API.
+servers:
+  - url: https://health-assessment-funnel.vercel.app/api/v1
+    description: Production
+  - url: http://localhost:3000/api/v1
+    description: Local development
+tags:
+  - name: Sessions
+  - name: Assessments
+  - name: Entitlement
+paths:
+  /sessions:
+    post:
+      tags: [Sessions]
+      summary: Create or reuse an anonymous session
+      operationId: createSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        '201':
+          description: New session. Plaintext sessionId is returned once.
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewSessionEnvelope'
+        '200':
+          description: Existing valid session reused.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReusedSessionEnvelope'
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '415': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+  /assessments:
+    post:
+      tags: [Assessments]
+      summary: Create or reuse the current active assessment
+      operationId: createAssessment
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [quizVersion]
+              properties:
+                quizVersion: { const: health-v1 }
+      responses:
+        '200':
+          description: Active assessment reused.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssessmentMutationEnvelope' }
+        '201':
+          description: Assessment created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssessmentMutationEnvelope' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+  /assessments/current:
+    get:
+      tags: [Assessments]
+      summary: Restore the current active assessment
+      operationId: getCurrentAssessment
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Current server-authoritative progress.
+          headers:
+            ETag:
+              schema: { type: string, pattern: '^"rev-(0|[1-9][0-9]*)"$' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssessmentProgressEnvelope' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /assessments/{assessmentId}:
+    parameters:
+      - $ref: '#/components/parameters/AssessmentId'
+    get:
+      tags: [Assessments]
+      summary: Read one owned assessment
+      operationId: getAssessment
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Server-authoritative progress.
+          headers:
+            ETag:
+              schema: { type: string, pattern: '^"rev-(0|[1-9][0-9]*)"$' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssessmentProgressEnvelope' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /assessments/{assessmentId}/steps/{stepKey}:
+    parameters:
+      - $ref: '#/components/parameters/AssessmentId'
+      - name: stepKey
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/StepKey' }
+    put:
+      tags: [Assessments]
+      summary: Persist one complete quiz step
+      operationId: saveAssessmentStep
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/SexStepRequest'
+                - $ref: '#/components/schemas/GoalStepRequest'
+                - $ref: '#/components/schemas/BodyStepRequest'
+                - $ref: '#/components/schemas/ActivityStepRequest'
+      responses:
+        '200':
+          description: Step saved.
+          headers:
+            ETag:
+              schema: { type: string, pattern: '^"rev-(0|[1-9][0-9]*)"$' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssessmentMutationEnvelope' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '412': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '428': { $ref: '#/components/responses/Problem' }
+  /assessments/{assessmentId}/funnel:
+    parameters:
+      - $ref: '#/components/parameters/AssessmentId'
+    get:
+      tags: [Assessments]
+      summary: Read the expanded 15-question funnel snapshot
+      operationId: getFunnelAnswers
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Server-authoritative funnel answers and revision.
+          headers:
+            ETag:
+              schema: { type: string, pattern: '^"rev-(0|[1-9][0-9]*)"$' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FunnelSnapshotEnvelope' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+    put:
+      tags: [Assessments]
+      summary: Persist one expanded funnel answer
+      operationId: saveFunnelAnswer
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FunnelPatchRequest' }
+      responses:
+        '200':
+          description: Funnel answer saved (same-value retries are no-ops).
+          headers:
+            ETag:
+              schema: { type: string, pattern: '^"rev-(0|[1-9][0-9]*)"$' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FunnelSnapshotEnvelope' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '412': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '428': { $ref: '#/components/responses/Problem' }
+  /assessments/{assessmentId}/submit:
+    parameters:
+      - $ref: '#/components/parameters/AssessmentId'
+    post:
+      tags: [Assessments]
+      summary: Validate, calculate and persist an immutable result
+      operationId: submitAssessment
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        '200':
+          description: Idempotent replay of an existing submission.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubmitEnvelope' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '412': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '428': { $ref: '#/components/responses/Problem' }
+  /assessments/{assessmentId}/result:
+    parameters:
+      - $ref: '#/components/parameters/AssessmentId'
+    get:
+      tags: [Entitlement]
+      summary: Read an entitlement-aware result projection
+      operationId: getAssessmentResult
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Structurally distinct preview or full result.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PreviewResultEnvelope'
+                  - $ref: '#/components/schemas/FullResultEnvelope'
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+  /pay:
+    post:
+      tags: [Entitlement]
+      summary: Simulate payment and activate the fixed demo plan
+      operationId: simulatePayment
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [assessmentId, planCode]
+              properties:
+                assessmentId: { type: string, format: uuid }
+                planCode: { const: demo_monthly }
+      responses:
+        '200':
+          description: Existing active entitlement was left unchanged.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PayEnvelope' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque-256-bit-base64url
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: __Host-health_session
+  parameters:
+    AssessmentId:
+      name: assessmentId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 128
+        pattern: '^[A-Za-z0-9._:-]+$'
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      schema: { type: string, pattern: '^"rev-(0|[1-9][0-9]*)"$' }
+  responses:
+    Problem:
+      description: Stable RFC 7807 application error.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+  schemas:
+    SessionId:
+      type: string
+      pattern: '^[A-Za-z0-9_-]{43}$'
+    Timestamp:
+      type: string
+      format: date-time
+    StepKey:
+      type: string
+      enum: [sex, goal, body, activity]
+    NextStep:
+      type: string
+      enum: [sex, goal, body, activity, review]
+    NewSessionEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          required: [sessionId, expiresAt, reused]
+          properties:
+            sessionId: { $ref: '#/components/schemas/SessionId' }
+            expiresAt: { $ref: '#/components/schemas/Timestamp' }
+            reused: { const: false }
+    ReusedSessionEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          required: [expiresAt, reused]
+          properties:
+            expiresAt: { $ref: '#/components/schemas/Timestamp' }
+            reused: { const: true }
+    AssessmentMutation:
+      type: object
+      additionalProperties: false
+      required: [assessmentId, status, revision, completedSteps, nextStep, updatedAt]
+      properties:
+        assessmentId: { type: string, format: uuid }
+        status: { type: string, enum: [draft, ready, completed] }
+        revision: { type: integer, minimum: 0 }
+        completedSteps:
+          type: array
+          maxItems: 4
+          items: { $ref: '#/components/schemas/StepKey' }
+        nextStep: { $ref: '#/components/schemas/NextStep' }
+        updatedAt: { $ref: '#/components/schemas/Timestamp' }
+    AssessmentMutationEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/AssessmentMutation' }
+    AssessmentProgress:
+      type: object
+      additionalProperties: false
+      required:
+        - assessmentId
+        - status
+        - quizVersion
+        - revision
+        - completedSteps
+        - nextStep
+        - answers
+        - updatedAt
+      properties:
+        assessmentId: { type: string, format: uuid }
+        status: { type: string, enum: [draft, ready, completed] }
+        quizVersion: { const: health-v1 }
+        revision: { type: integer, minimum: 0 }
+        completedSteps:
+          type: array
+          maxItems: 4
+          items: { $ref: '#/components/schemas/StepKey' }
+        nextStep: { $ref: '#/components/schemas/NextStep' }
+        answers:
+          type: object
+          additionalProperties: false
+          properties:
+            sex:
+              type: object
+              additionalProperties: false
+              required: [sexForCalorieEstimation]
+              properties:
+                sexForCalorieEstimation: { type: string, enum: [female, male] }
+            goal:
+              type: object
+              additionalProperties: false
+              required: [primaryGoal]
+              properties:
+                primaryGoal: { type: string, enum: [lose_weight, maintain_weight, gain_weight] }
+            body:
+              $ref: '#/components/schemas/BodyStepData'
+            activity:
+              type: object
+              additionalProperties: false
+              required: [activityLevel]
+              properties:
+                activityLevel:
+                  { type: string, enum: [sedentary, light, moderate, active, very_active] }
+        updatedAt: { $ref: '#/components/schemas/Timestamp' }
+    AssessmentProgressEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/AssessmentProgress' }
+    FunnelSnapshotEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/FunnelSnapshot' }
+    FunnelSnapshot:
+      type: object
+      additionalProperties: false
+      required: [revision, answers]
+      properties:
+        revision: { type: integer, minimum: 0 }
+        answers: { $ref: '#/components/schemas/FunnelAnswers' }
+    FunnelPatchRequest:
+      type: object
+      additionalProperties: false
+      required: [key, value]
+      properties:
+        key:
+          type: string
+          enum:
+            [
+              motivation,
+              primaryGoal,
+              experience,
+              activityLevel,
+              sitting,
+              focus,
+              barriers,
+              minutes,
+              days,
+              equipment,
+              sexForCalorieEstimation,
+              ageYears,
+              heightCm,
+              weightKg,
+              targetWeightKg,
+            ]
+        value:
+          description: Value validated against the selected key's enum, array or metric range.
+          oneOf:
+            - type: string
+            - type: integer
+            - type: number
+            - type: array
+              items: { type: string }
+    FunnelAnswers:
+      type: object
+      additionalProperties: false
+      properties:
+        motivation:
+          type: array
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+          items: { type: string, enum: [strength, flexibility, posture, energy, calm] }
+        primaryGoal: { type: string, enum: [lose_weight, maintain_weight, gain_weight] }
+        experience: { type: string, enum: [new, some, regular] }
+        activityLevel: { type: string, enum: [sedentary, light, moderate, active, very_active] }
+        sitting: { type: string, enum: [little, some, mostly] }
+        focus:
+          type: array
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+          items: { type: string, enum: [whole_body, core, back, legs, arms] }
+        barriers:
+          type: array
+          minItems: 1
+          maxItems: 4
+          uniqueItems: true
+          items: { type: string, enum: [time, consistency, confidence, none] }
+        minutes: { type: string, enum: ['10', '15', '20', '30'] }
+        days: { type: string, enum: ['2', '3', '4', '5'] }
+        equipment: { type: string, enum: [none, mat, bands] }
+        sexForCalorieEstimation: { type: string, enum: [female, male] }
+        ageYears: { type: integer, minimum: 18, maximum: 80 }
+        heightCm: { type: number, minimum: 120, maximum: 230, multipleOf: 0.01 }
+        weightKg: { type: number, minimum: 35, maximum: 300, multipleOf: 0.01 }
+        targetWeightKg: { type: number, minimum: 35, maximum: 300, multipleOf: 0.01 }
+    SexStepRequest:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          required: [sexForCalorieEstimation]
+          properties:
+            sexForCalorieEstimation: { type: string, enum: [female, male] }
+    GoalStepRequest:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          required: [primaryGoal]
+          properties:
+            primaryGoal: { type: string, enum: [lose_weight, maintain_weight, gain_weight] }
+    BodyStepData:
+      type: object
+      additionalProperties: false
+      required: [ageYears, heightCm, weightKg, targetWeightKg]
+      properties:
+        ageYears: { type: integer, minimum: 18, maximum: 80 }
+        heightCm: { type: number, minimum: 120, maximum: 230, multipleOf: 0.01 }
+        weightKg: { type: number, minimum: 35, maximum: 300, multipleOf: 0.01 }
+        targetWeightKg: { type: number, minimum: 35, maximum: 300, multipleOf: 0.01 }
+    BodyStepRequest:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/BodyStepData' }
+    ActivityStepRequest:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          required: [activityLevel]
+          properties:
+            activityLevel: { type: string, enum: [sedentary, light, moderate, active, very_active] }
+    SubmitEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          required: [assessmentId, resultId, status, calculatedAt]
+          properties:
+            assessmentId: { type: string, format: uuid }
+            resultId: { type: string, format: uuid }
+            status: { const: completed }
+            calculatedAt: { $ref: '#/components/schemas/Timestamp' }
+    CalorieRange:
+      type: object
+      additionalProperties: false
+      required: [min, max]
+      properties:
+        min: { type: integer, minimum: 0 }
+        max: { type: integer, minimum: 0 }
+    WarningCode:
+      type: string
+      enum:
+        - PROFESSIONAL_GUIDANCE_RECOMMENDED
+        - PREDICTION_HORIZON_EXCEEDED
+        - MAINTENANCE_GOAL_NO_ARRIVAL_DATE
+    PreviewResultEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          required:
+            [
+              access,
+              bmi,
+              bmiCategory,
+              summary,
+              calorieRange,
+              warnings,
+              upgradeRequired,
+              lockedFeatures,
+            ]
+          properties:
+            access: { const: preview }
+            bmi: { type: number }
+            bmiCategory: { type: string, enum: [underweight, healthy_weight, overweight, obesity] }
+            summary: { const: A gradual plan is recommended. }
+            calorieRange:
+              oneOf:
+                - $ref: '#/components/schemas/CalorieRange'
+                - type: 'null'
+            warnings:
+              type: array
+              items: { $ref: '#/components/schemas/WarningCode' }
+            upgradeRequired: { const: true }
+            lockedFeatures:
+              type: array
+              items:
+                type: string
+                enum: [bmrKcal, tdeeKcal, exactDailyCalories, targetDate, weightProjection]
+    ProjectionPoint:
+      type: object
+      additionalProperties: false
+      required: [date, weightKg]
+      properties:
+        date: { type: string, format: date }
+        weightKg: { type: number }
+    FullResultEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          required:
+            - access
+            - bmi
+            - bmiCategory
+            - bmrKcal
+            - tdeeKcal
+            - exactDailyCalories
+            - calorieEstimateAvailable
+            - calorieRange
+            - targetDate
+            - weightProjection
+            - warnings
+            - algorithmVersion
+          properties:
+            access: { const: full }
+            bmi: { type: number }
+            bmiCategory: { type: string, enum: [underweight, healthy_weight, overweight, obesity] }
+            bmrKcal: { type: integer, minimum: 1 }
+            tdeeKcal: { type: integer, minimum: 1 }
+            exactDailyCalories: { type: [integer, 'null'] }
+            calorieEstimateAvailable: { type: boolean }
+            calorieRange:
+              oneOf:
+                - $ref: '#/components/schemas/CalorieRange'
+                - type: 'null'
+            targetDate: { type: [string, 'null'], format: date }
+            weightProjection:
+              type: array
+              maxItems: 105
+              items: { $ref: '#/components/schemas/ProjectionPoint' }
+            warnings:
+              type: array
+              items: { $ref: '#/components/schemas/WarningCode' }
+            algorithmVersion: { const: health-v1 }
+    PayEnvelope:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: object
+          additionalProperties: false
+          required: [assessmentId, planCode, outcome, subscriptionStatus, validFrom, validUntil]
+          properties:
+            assessmentId: { type: string, format: uuid }
+            planCode: { const: demo_monthly }
+            outcome: { type: string, enum: [activated, already_active] }
+            subscriptionStatus: { const: active }
+            validFrom: { $ref: '#/components/schemas/Timestamp' }
+            validUntil:
+              oneOf:
+                - $ref: '#/components/schemas/Timestamp'
+                - type: 'null'
+    FieldProblem:
+      type: object
+      additionalProperties: false
+      required: [path, message]
+      properties:
+        path: { type: string }
+        message: { type: string }
+    Problem:
+      type: object
+      additionalProperties: true
+      required: [type, title, status, code, detail, traceId]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer, minimum: 400, maximum: 599 }
+        code: { type: string }
+        detail: { type: string }
+        traceId: { type: string }
+        errors:
+          type: array
+          items: { $ref: '#/components/schemas/FieldProblem' }
+        meta: { type: object }

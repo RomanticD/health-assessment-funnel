@@ -22,7 +22,8 @@ pnpm verify           # format/lint/typecheck/coverage/build + stack
 | `/pay` 状态变化、幂等 replay、支付后 full                     | `tests/integration/access-payment-api.test.ts`                                      |
 | session/cookie/Bearer/origin/BOLA/no-store                    | `tests/integration/http-boundaries.test.ts`                                         |
 | 真实 15 题、刷新恢复、无 Web Storage、paywall、full reload    | `tests/e2e/funnel.spec.ts`                                                          |
+| 在线 OpenAPI 文档与规范文件可访问                             | `tests/e2e/funnel.spec.ts`                                                          |
 
 ## 有意未覆盖
 
-真实支付网关、邮箱账号迁移、跨设备分享和医学验证不属于题目 demo 的范围。图表动画用 CSS + SVG 实现，视觉验收补充了 reduced-motion 分支和人工截图核对，不依赖脆弱的像素快照。
+真实支付网关、邮箱账号迁移、跨设备分享和医学验证不属于当前产品范围。图表动画用 CSS + SVG 实现，视觉验收补充了 reduced-motion 分支和人工截图核对，不依赖脆弱的像素快照。

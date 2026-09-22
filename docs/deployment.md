@@ -50,7 +50,7 @@ Never create `NEXT_PUBLIC_SUPABASE_SECRET_KEY`. The browser does not need any Su
 4. Apply the reviewed migration to Supabase as an explicit operation. Confirm migration history, table count, RLS and advisors.
 5. Configure Vercel variables as Config/Secret, then redeploy the exact green commit.
 6. Verify `/api/health`, execute the cURL flow in [`api.md`](./api.md), and run the browser funnel against the production alias.
-7. Record the deployment ID, commit SHA and paid demo fixture in the delivery README.
+7. Record the deployment ID, commit SHA and paid fixture in the delivery README.
 
 Ordinary pull requests never run `supabase db push` against production. CI creates/reset a local Supabase stack, so untrusted code cannot mutate the hosted project.
 
@@ -86,4 +86,4 @@ No down migration is promised for append-only result/payment data. Destructive c
 3. Redeploy and run the full smoke flow.
 4. Revoke the old key only after the new deployment is verified.
 
-Paid demo session rotation is independent of the Supabase server secret. Update the documented session only after the replacement fixture returns full results and rejects/avoids unintended mutation.
+Paid fixture rotation is independent of the Supabase server secret. Update the documented session only after the replacement fixture returns full results and rejects unintended mutation.

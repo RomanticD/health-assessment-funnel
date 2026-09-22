@@ -75,7 +75,7 @@ assessment/user UUID 默认也不记；若调试必须关联，使用短期、�
 - seed、测试、截图、README 只用合成数据。
 - 公网表单可能被真实用户填写，因此按健康相关数据对待：最小字段、短 retention、无第三方 analytics payload、TLS、no-store。
 - 没有最终用户自助删除 endpoint 是 MVP 已知限制；README 给出 session 到期/清理周期和项目维护者删除流程，不能宣称“随时自助删除”。
-- 结果是教育性估算，不能用成功率、伪造进度或医学背书制造信任。
+- 结果是一般 wellness 估算，不能用成功率、伪造进度或医学背书制造信任。
 
 ## Release 证据包
 

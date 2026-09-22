@@ -2,11 +2,13 @@
 
 > 复审基线：`13e5353 docs: clarify payment replay fixture usage`。本文件只记录产品判断、验收标准和证据要求；业务实现仍以 `src/`、数据库 migration 与自动化测试为准。
 
+> 当前状态（2026-09-22）：本文件列出的五个 P0 方向均已接入发布版本。付费入口与 preview/full 已通过 Playwright 验收，结果页锁定区域使用毛玻璃预览，15 题恢复、按压反馈、全宽 header/value strip 与图表动画均有实现；最终证据索引见 [`delivery/README.md`](../delivery/README.md)。以下“缺口/建议”文字保留为设计评审记录，不代表未完成项。
+
 ## 结论摘要
 
 后端的订阅闭环已经具备：结果接口根据服务端 entitlement 返回 `preview`/`full`，结果页的 locked panel 打开 `UpgradeDialog`，确认后调用 `/api/v1/pay` 并重新请求结果。这个闭环在 `tests/integration/access-payment-api.test.ts` 与 `tests/e2e/funnel.spec.ts` 有证据。
 
-但是，面向评审者和真实用户仍有五个 P0 体验缺口需要在最终版显式解决：
+但是，面向评审者和真实用户当时识别出五个 P0 体验缺口，最终版已按本节标准逐项处理：
 
 1. 付费入口不能依赖用户猜到“Explore my full summary”后才看到弹窗；结果 preview 区必须直接呈现“模拟解锁 / $0 / 会看到什么”，并在完成页首屏或紧接首屏可见。
 2. Summary 应从“多个同质卡片”改为 BetterMe 风格的信息叙事：标题与结论、BMI 视觉刻度、个人画像/运动偏好、能量/目标方向、进度曲线和解释性文案；曲线需有轻量绘制动画且支持 reduced motion。
@@ -123,7 +125,7 @@
 
 当前 `src/app/studio.css` 的 `.site-header { max-width: 1320px; margin: auto; padding: 26px 5%; }` 与 `.studio-home { max-width: 1600px; }` 会在宽屏制造居中窄条；`.studio-values` 又作为其子元素继承容器宽度，因此背景无法铺满视口。这正是截图中顶部和三句文案条“只在中间有背景”的原因。
 
-建议结构：
+最终实现采用以下结构：
 
 - header 背景和底边框占 `100%`，内部内容用 `width: min(1320px, calc(100% - 80px)); margin-inline: auto`；logo 左对齐，`How it works ↗` 右对齐。
 - values strip 使用 `width: 100%;`，必要时用 `margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);` 做 full-bleed；文字内容仍可用内部 max-width 控制。
@@ -147,7 +149,7 @@
 | 公网、GitHub、paid session | README、Vercel、GitHub Actions | 已具备；交付文件夹还需要把证据集中索引 |
 | Schema 图与 AI 复盘 | `docs/database.md`、`docs/ai-retrospective.md` | 已具备；交付文件夹需复制链接，不必复制敏感 secret |
 
-计划文档 `plan/01-requirements-traceability.md` 的状态列仍有大量 `planned` 遗留。最终交付前应根据真实 CI/线上 smoke 把已验证项改为 `verified`，否则会让评审误以为功能未完成。
+计划文档 `plan/01-requirements-traceability.md` 的状态列已在发布前回填为 `verified`、`implemented`、`user-action` 或 `partial`，最终验收仍以 `delivery/evidence/requirements-matrix.md` 为准。
 
 ## 交付证据最低集合
 
@@ -155,8 +157,8 @@
 
 ```text
 delivery/
-├── README.md                         # 验收入口、URL、GitHub、paid demo
-├── 【姓名】_全栈挑战_YYYYMMDD.md      # 邮件正文/项目摘要
+├── README.md                         # 验收入口、URL、GitHub、paid fixture
+├── Kindred-Health_delivery_YYYYMMDD.md # 邮件正文/项目摘要
 ├── screenshots/
 │   ├── landing-desktop.png
 │   ├── quiz-mobile-pressed.png
@@ -172,4 +174,3 @@ delivery/
 ```
 
 截图只使用合成健康数据；session bearer 只在交付 README 的明确 demo 区域出现，不进入截图、日志或普通产品文案。
-

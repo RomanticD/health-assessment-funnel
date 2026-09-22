@@ -7,20 +7,22 @@
 ## 线上与仓库
 
 - 公网演示：https://health-assessment-funnel.vercel.app
-- 付费入口快速调试：https://health-assessment-funnel.vercel.app/demo/paywall（固定 preview 数据，不写入 Supabase）
+- 结果访问与 checkout 页面：https://health-assessment-funnel.vercel.app/demo/paywall（固定合成数据，不写入 Supabase）
 - GitHub：https://github.com/RomanticD/health-assessment-funnel
 - 健康检查：https://health-assessment-funnel.vercel.app/api/health
+- API reference（Swagger UI）：https://health-assessment-funnel.vercel.app/api-docs
+- OpenAPI 3.1：<https://health-assessment-funnel.vercel.app/openapi.yaml>
 - 设计/产品复审：[plan/16-p0-product-review.md](../plan/16-p0-product-review.md)
 
 ## 评审者 5 分钟路径
 
 1. 打开公网链接，点击 `Find my starting point`，完成 15 道题。
 2. 结果页先展示可读的免费预览；顶部 sticky 入口显示 `YOUR PERSONAL PLAN` 和 `Unlock your full summary`，内容内也保留 `See your full summary`，无需猜测付费入口。
-3. 打开弹窗，确认 `No card · No charge · No renewal`，点击 `Unlock full summary — free demo`。
+3. 打开弹窗，确认 `No card · No charge · No renewal`，点击 `Unlock full summary — no charge`。
 4. 支付后页面重新读取结果，徽标变为 `Your full summary`，出现完整能量数值和带绘制动画的目标曲线。
 5. 刷新结果页，full entitlement 仍然有效。
 
-## 付费入口快速调试 URL
+## 结果访问与 checkout URL
 
 如果只需要检查付费弹窗、按钮状态和 preview/full 差异，不必重新填写 15 题：
 
@@ -28,7 +30,7 @@
 https://health-assessment-funnel.vercel.app/demo/paywall
 ```
 
-这个页面使用固定的合成 preview 数据，打开后会显示 `YOUR PERSONAL PLAN` 和 `Unlock your full summary`。点击后可以直接检查弹窗，再点击 `Unlock full summary — free demo` 查看完整结果布局。它只验证前端交互，不创建 session、不调用支付接口，也不会修改 Supabase；真实后端闭环仍按上面的 5 分钟路径或 pre-authorized session 验证。
+这个页面使用固定的合成结果数据，打开后会显示 `YOUR PERSONAL PLAN` 和 `Unlock your full summary`。点击后可以检查 checkout 弹窗，再点击 `Unlock full summary — no charge` 查看完整结果布局。该页面只验证前端呈现，不创建 session、不调用支付接口，也不会修改 Supabase；真实后端闭环仍按上面的 5 分钟路径或 pre-authorized session 验证。
 
 ## 已支付 session（只读 fixture）
 
@@ -61,21 +63,22 @@ curl --fail-with-body "$BASE_URL/api/v1/assessments/$ASSESSMENT_ID/result" \
 
 ## 交付物索引
 
-| 交付项                         | 证据                                                                                                                                                                                                                 |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 公网链接、GitHub、paid session | 本页顶部与 demo session 区块                                                                                                                                                                                         |
-| API 文档与 cURL                | [docs/api.md](../docs/api.md)、[docs/openapi.yaml](../docs/openapi.yaml)、[evidence/api-and-payment.md](evidence/api-and-payment.md)                                                                                 |
-| 15 题分步保存/恢复             | [evidence/requirements-matrix.md](evidence/requirements-matrix.md)、[src/components/quiz/personal-quiz.tsx](../src/components/quiz/personal-quiz.tsx)                                                                |
-| 订阅鉴权与差异化结果           | [evidence/api-and-payment.md](evidence/api-and-payment.md)、[tests/integration/access-payment-api.test.ts](../tests/integration/access-payment-api.test.ts)、[tests/e2e/funnel.spec.ts](../tests/e2e/funnel.spec.ts) |
-| 测试与边界覆盖                 | [evidence/test-map.md](evidence/test-map.md)                                                                                                                                                                         |
-| 数据库 Schema 图               | [schema/assessment-erd.md](schema/assessment-erd.md)、[docs/database.md](../docs/database.md)                                                                                                                        |
-| CI / 部署 / smoke              | [evidence/ci-and-production.md](evidence/ci-and-production.md)                                                                                                                                                       |
-| AI 使用复盘                    | [docs/ai-retrospective.md](../docs/ai-retrospective.md)、[evidence/ai-review.md](evidence/ai-review.md)                                                                                                              |
-| UI 验收与参考图                | [evidence/ui-acceptance.md](evidence/ui-acceptance.md)、[references/](references/)                                                                                                                                   |
+| 交付项                          | 证据                                                                                                                                                                                                                                        |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 公网链接、GitHub、paid session  | 本页顶部与 paid fixture 区块                                                                                                                                                                                                                |
+| API 文档与 cURL                 | [在线 Swagger UI](https://health-assessment-funnel.vercel.app/api-docs)、[OpenAPI 3.1](https://health-assessment-funnel.vercel.app/openapi.yaml)、[docs/api.md](../docs/api.md)、[evidence/api-and-payment.md](evidence/api-and-payment.md) |
+| 15 题分步保存/恢复              | [evidence/requirements-matrix.md](evidence/requirements-matrix.md)、[src/components/quiz/personal-quiz.tsx](../src/components/quiz/personal-quiz.tsx)                                                                                       |
+| 订阅鉴权与差异化结果            | [evidence/api-and-payment.md](evidence/api-and-payment.md)、[tests/integration/access-payment-api.test.ts](../tests/integration/access-payment-api.test.ts)、[tests/e2e/funnel.spec.ts](../tests/e2e/funnel.spec.ts)                        |
+| 测试与边界覆盖                  | [evidence/test-map.md](evidence/test-map.md)                                                                                                                                                                                                |
+| 数据库 Schema 图                | [schema/assessment-erd.md](schema/assessment-erd.md)、[Supabase Schema Visualizer](https://supabase.com/dashboard/project/kfyqgzuatywmsuruwsei/database/schemas)、[docs/database.md](../docs/database.md)                                   |
+| CI / 部署 / smoke               | [evidence/ci-and-production.md](evidence/ci-and-production.md)                                                                                                                                                                              |
+| Supabase fixture 轮换与拒写证据 | [evidence/supabase-fixture.md](evidence/supabase-fixture.md)                                                                                                                                                                                |
+| AI 使用复盘                     | [docs/ai-retrospective.md](../docs/ai-retrospective.md)、[evidence/ai-review.md](evidence/ai-review.md)                                                                                                                                     |
+| UI 验收与参考图                 | [evidence/ui-acceptance.md](evidence/ui-acceptance.md)、[references/](references/)                                                                                                                                                          |
 
 ## URL 与隐私边界
 
-题目要求的“复制地址恢复”采用同浏览器恢复，而不是把 session 当作 URL token：
+链接恢复策略采用同浏览器恢复，而不是把 session 当作 URL token：
 
 - 题目 URL 只表达当前导航，例如 `/quiz/ageYears`、`/quiz/review`。
 - 结果 URL 可以包含 assessment UUID，但 UUID 不是授权凭证；服务端仍要求当前浏览器的 HttpOnly session。
@@ -85,4 +88,4 @@ curl --fail-with-body "$BASE_URL/api/v1/assessments/$ASSESSMENT_ID/result" \
 
 ## 已知边界
 
-这是一个 wellness 产品预览，不是医疗诊断或真实收费产品。目标日期和热量是服务端估算，不能替代医生或注册营养师意见；公开 paid fixture 是合成只读数据，按到期时间轮换。
+Kindred Health 当前提供 wellness 估算与测试环境 checkout，不构成医疗诊断，也不连接外部收费渠道。目标日期和热量是服务端估算，不能替代医生或注册营养师意见；公开 paid fixture 是合成只读数据，按到期时间轮换。

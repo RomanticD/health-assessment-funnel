@@ -76,12 +76,12 @@ test('personal quiz saves each answer, restores measurements, edits and unlocks 
   await page.screenshot({ path: 'test-results/result-preview-mobile.png', fullPage: true })
   await page.getByRole('button', { name: 'See your full summary' }).click()
   await expect(page.getByRole('dialog')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Unlock full summary — free demo' })).toBeFocused()
+  await expect(page.getByRole('button', { name: 'Unlock full summary — no charge' })).toBeFocused()
   await page.screenshot({ path: 'test-results/paywall-dialog-mobile.png', fullPage: true })
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).toBeHidden()
   await page.getByRole('button', { name: 'See your full summary' }).click()
-  await page.getByRole('button', { name: 'Unlock full summary — free demo' }).click()
+  await page.getByRole('button', { name: 'Unlock full summary — no charge' }).click()
   await expect(page.getByText('Your full summary', { exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Your full summary is saved.' })).toBeVisible()
   await page.waitForTimeout(900)
@@ -110,7 +110,21 @@ test('fixed mock route opens the paywall without completing the funnel', async (
 
   await page.getByRole('button', { name: 'Unlock your full summary' }).click()
   await expect(page.getByRole('dialog')).toBeVisible()
-  await page.getByRole('button', { name: 'Unlock full summary — free demo' }).click()
+  await page.getByRole('button', { name: 'Unlock full summary — no charge' }).click()
   await expect(page.getByText('Your full summary', { exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Numbers to help you plan.' })).toBeVisible()
+})
+
+test('public API reference serves the versioned OpenAPI document', async ({ page }) => {
+  const openApi = await page.request.get('/openapi.yaml')
+  expect(openApi.ok()).toBeTruthy()
+  expect(openApi.headers()['content-type']).toMatch(/yaml|text|octet-stream/)
+  expect(await openApi.text()).toContain('openapi: 3.1.0')
+
+  await page.goto('/api-docs')
+  await expect(page.getByRole('heading', { name: 'Health Assessment API' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'OpenAPI 3.1 YAML' })).toHaveAttribute(
+    'href',
+    '/openapi.yaml',
+  )
 })

@@ -95,7 +95,7 @@ export function DemoPaywallExperience() {
         <header className="result-heading">
           <p className="eyebrow">YOUR WELLNESS PROFILE</p>
           <h1>Here’s your wellness profile</h1>
-          <p>A preview of your personal summary. Nothing is charged in this demo.</p>
+          <p>A preview of your personal summary. No payment is collected here.</p>
           <span className={isFull ? 'access-badge access-badge--full' : 'access-badge'}>
             {isFull ? 'Your full summary' : 'Your free preview'}
           </span>

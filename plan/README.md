@@ -1,8 +1,8 @@
 # Health Assessment Funnel — 项目规划索引
 
-> 仓库建议名：`health-assessment-funnel`
+> 仓库：`health-assessment-funnel`
 > 规划基线日期：2026-09-21（Asia/Shanghai）
-> 当前阶段：规划完成并经首轮独立审查；GitHub/Next.js 基线已建立，Supabase 远端 Schema 尚未修改
+> 当前状态：实现、部署和交付验收已完成（2026-09-22）。本目录保留设计决策与执行记录；最终状态以 [`delivery/README.md`](../delivery/README.md) 和 [`delivery/evidence/requirements-matrix.md`](../delivery/evidence/requirements-matrix.md) 为准。
 
 ## 目标
 
@@ -18,7 +18,7 @@
 ## 已确定的默认方案
 
 - Next.js App Router + TypeScript strict，单仓部署，后端使用 Route Handlers。
-- Supabase 托管 PostgreSQL；目标是 `Full Stack Demo` 组织下的 `RomanticD's Project`（项目 ref 仅记录在本地环境配置，不写入公开文档）。
+- Supabase 托管 PostgreSQL；当前项目 ref 为 `kfyqgzuatywmsuruwsei`。
 - 使用高熵匿名会话 token，不要求用户注册；浏览器以安全 Cookie 携带，cURL 可用 `Authorization` 头。
 - 所有业务表启用 RLS，撤销 `anon` / `authenticated` 的表级默认权限；浏览器不直连业务表。
 - 核心输入采用强类型列，扩展问卷才用 JSONB。
@@ -50,15 +50,15 @@
 | [14-observability-privacy-operations.md](./14-observability-privacy-operations.md) | 日志脱敏、健康检查、隐私、runbook 与 release 证据 |
 | [99-agent-review.md](./99-agent-review.md) | 独立 agent 对本计划的审查和修订记录 |
 
-## 进入实现的门槛
+## 实现门槛（已关闭）
 
-1. 需求矩阵无遗漏，review 中 P0 问题清零。
-2. GitHub 远端认证恢复，能保证每个关键提交及时 push。
-3. Supabase 目标项目再次核对且仍为空库；不在规划阶段直接改远端。
-4. 数据边界、session 策略、`/pay` demo 语义冻结。
-5. 本地 Docker 可用，或明确备用的集成测试数据库方案。
+1. ✅ 需求矩阵无遗漏，P0 入口、preview/full、只读 fixture 和支付闭环已通过代码与线上 smoke。
+2. ✅ GitHub `main` 已建立并持续 push；关键提交对应绿色 Actions run。
+3. ✅ Supabase 远端 migration 已执行，RLS/ACL/RPC 与 Schema Visualizer 已核验。
+4. ✅ 数据边界、session 策略、固定测试 plan 和 `/pay` 幂等语义已冻结。
+5. ✅ 本地 Docker/Supabase stack 与 CI fresh stack 均可运行。
 
-GitHub private repository 与 Docker 已在 2026-09-21 后续 preflight 中恢复；Vercel team 可见。真实测试数据库、远端 migration 和完整 CI 仍须按计划产生证据后才能宣称交付。
+实现阶段已结束；不要把本页的原始门槛误读成当前未完成项。
 
 ## 事实与假设
 

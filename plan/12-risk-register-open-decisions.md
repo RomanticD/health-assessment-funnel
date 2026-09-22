@@ -6,7 +6,7 @@
 |---|---|---|---|---|
 | K01 | 题面 2 天/3 天矛盾导致范围失控 | 高/高 | 以 2 天为硬截止，冻结非核心范围 | 开工前 |
 | K02 | GitHub 无法 push | 已解决/高 | CLI OAuth 已恢复，private repo 已创建并完成首推 | resolved |
-| K03 | Docker daemon 未启动，集成测试跑不起来 | 已解决/高 | Docker 24.0.6 已验证；仍须 local Supabase reset 证明 | implementation |
+| K03 | Docker daemon 未启动，集成测试跑不起来 | 已解决/高 | Docker/Supabase fresh stack 与 CI 均已通过 | resolved |
 | K04 | Supabase CLI 未安装/版本漂移 | 已发生/中 | 固定 devDependency + lockfile，所有命令先 `--help` | scaffold |
 | K05 | 当前 public 默认 ACL 过宽 | 高/高 | 首 migration revoke defaults + RLS + 权限测试 | 首 migration |
 | K06 | server secret 泄露到客户端/日志 | 低/严重 | server-only env、secret scan、bundle grep、日志脱敏 | 持续 |
@@ -17,17 +17,17 @@
 | K11 | 支付后仍拿缓存 preview | 中/高 | dynamic + `private,no-store` + 支付后 refetch + header tests | result 完成 |
 | K12 | 健康算法被误解为医疗建议 | 中/高 | 明确非医疗声明、保守边界、warning、方法页 | UI/docs |
 | K13 | 公式/测试复制同一 AI 错误 | 中/高 | 独立 oracle、性质测试、手算样例、agent review | algorithm |
-| K14 | paid demo token 被公开用户污染 | 高/中 | 合成只读 fixture、可轮换，另提供自建 session cURL | deploy |
+| K14 | paid fixture 被公开用户污染 | 已缓解/中 | `demo_readonly`、旧凭证撤销、轮换记录和自建 session cURL | release evidence |
 | K15 | Vercel/Supabase 区域延迟 | 中/中 | 选择接近用户/DB 的 runtime、测 smoke、避免多次往返 | deploy |
 | K16 | 免费项目休眠/限额影响演示 | 中/高 | 交付前唤醒与 smoke，README 提示；避免高资源后台任务 | final |
 | K17 | 依赖最新版本兼容问题 | 中/中 | 稳定版、Node 22、锁文件、build early | scaffold |
 | K18 | 邮件/文档姓名缺失 | 高/中 | 最终阶段向用户获取姓名并预览邮件 | final |
-| K19 | 误以为 `seed.sql` 会随 production migration 部署 | 中/高 | seed 仅 local/CI；显式 provisioning/rotate script + remote smoke | deploy |
+| K19 | 误以为 `seed.sql` 会随 production migration 部署 | 已缓解/中 | seed 仅 local/CI；受控 provisioning/rotation runbook + remote smoke | release evidence |
 | K20 | 两天排期无余量导致测试/部署被挤掉 | 高/高 | Must/Stretch 冻结，20h 中保留 3h buffer | 持续 |
 
 ## 已解决的环境疑问
 
-- `Full Stack Demo` 是 Supabase organization，不是 project；唯一项目 `RomanticD's Project` 可合理作为目标。
+- Supabase organization 名称与 project 名称不同；目标 project 是 `RomanticD's Project`，ref 为 `kfyqgzuatywmsuruwsei`。
 - 项目是空库，适合由 versioned migration 建立干净基线。
 - 本地 Git 已以 `main` 初始化。
 - 仓库名由实现内容决定，建议 `health-assessment-funnel`。
@@ -44,7 +44,7 @@ Vercel team `romanticds-projects` 已可见；deploy connector action 不可用�
 
 ### 3. 最终姓名
 
-用于 `【姓名】_全栈挑战_YYYYMMDD` 和交付邮件。只在最终交付前需要。
+用于最终邮件署名和附件命名；仓库内已使用中性的 `Kindred-Health_delivery_20260922.md`，外发前由交付人确认。
 
 ## 技术决策：默认与备选
 
@@ -72,13 +72,13 @@ Vercel team `romanticds-projects` 已可见；deploy connector action 不可用�
 备选：Supabase pooled `DATABASE_URL` + typed SQL repository。
 切换条件：RPC schema exposure/config 阻塞，或直接 SQL 能以更少权限稳定部署。
 
-## Go/No-Go 检查
+## Go/No-Go 检查（最终状态）
 
 进入远端变更前必须：
 
-- [ ] review P0 清零。
-- [ ] GitHub 认证恢复且 remote owner/visibility 确认。
-- [ ] Docker/Supabase local test 栈可启动。
-- [ ] session ADR 最终冻结。
-- [ ] migration 已在空本地库通过。
-- [ ] 无真实健康数据或 secret 进入 seed/repo。
+- [x] review P0 清零。
+- [x] GitHub 认证恢复且 remote owner/visibility 确认。
+- [x] Docker/Supabase local test 栈可启动。
+- [x] session ADR 最终冻结。
+- [x] migration 已在空本地库通过。
+- [x] 无真实健康数据或 secret 进入 seed/repo。

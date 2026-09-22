@@ -46,8 +46,8 @@ P1：ACL/default privileges 要到可执行级；函数空 search path/全限定
 | 竞品观察过度声称 | 把 Computer 实测和用户补充/工程推导分节；不再继续浏览 | `02-competitor-analysis.md` | 文档已修复 |
 | session/paid fixture 歧义 | `sessionId`=43-char base64url 256-bit bearer；内部为 `sessionRecordId`；标准 Bearer；demo_readonly；移除 revoke endpoint | `03`、`04`、`05`、`06` | 文档已修复 |
 | 算法未冻结/示例错误 | 冻结 raw 分类、所有阈值/百分比/floor/cap/rounding/unavailable；70kg 黄金样例可复算 | `07-health-algorithm-validation.md`、`04-api-contract.md` | 文档已修复 |
-| service role/RLS 信任边界 | RLS 只证明 public Data API fail-closed；RPC 同事务 session_hash→owner/scope，绝不接收 userId | `03`、`05`、`06`、`08` | 文档已修复，待实现证明 |
-| 线上 fixture 误用 seed | seed 仅 local/CI；独立 provisioning/rotate script + full read/write-deny smoke | `05`、`10`、`13` | 文档已修复，待实现证明 |
+| service role/RLS 信任边界 | RLS 只证明 public Data API fail-closed；RPC 同事务 session_hash→owner/scope，绝不接收 userId | `03`、`05`、`06`、`08` | 已实现并有集成/ACL 证据 |
+| 线上 fixture 误用 seed | seed 仅 local/CI；受控 Supabase provisioning/rotation + full read/write-deny smoke | `05`、`10`、`13` | 已实现并有线上证据 |
 | 两天范围超载 | Must/Stretch、15% buffer；移除扩展表/revoke/ready/自动 OpenAPI；两组 CI | `13-two-day-execution-plan.md` | 文档已修复 |
 | GitHub/Docker/Vercel | 记录为实现前 Go/No-Go，不把计划文字当成外部状态已解决 | `12`、`13` | **仍阻塞实现** |
 
@@ -92,7 +92,7 @@ P1：ACL/default privileges 要到可执行级；函数空 search path/全限定
 
 **规划内容：Complete with documented constraints。** 原始需求、架构、API、DB、安全、算法、状态/并发、测试矩阵、UI、CI/部署、可观测性、AI 复盘和两天排期均有独立文档；第一轮所有内部设计 P0 已逐项处理。
 
-**功能实现：No-Go until external preflight。** 必须先让 `RomanticD` 能创建/push private repo，并让 Vercel target 可见；Docker/local Supabase 需在进入集中测试前可用。Supabase 与 Playwright connector 已通过只读可用性检查。
+**功能实现：已通过 external preflight。** `RomanticD/health-assessment-funnel`、Vercel deployment、Docker/local Supabase 和 Supabase 远端目标均已核验；本节保留原始审查时的阻塞记录，当前发布证据以 `delivery/evidence/ci-and-production.md` 为准。
 
 第二轮独立复审在 agent quota 恢复后应再次运行；即使未运行，也不能降低上述外部 Go/No-Go 条件或测试门槛。
 

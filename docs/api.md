@@ -1,6 +1,8 @@
-# API contract and replayable demo
+# API contract and replayable checkout
 
 Base URL：`https://health-assessment-funnel.vercel.app/api/v1`。JSON 使用 camelCase，公制单位为 cm、kg、kcal/day。
+
+Interactive reference：<https://health-assessment-funnel.vercel.app/api-docs>；downloadable OpenAPI 3.1 document：<https://health-assessment-funnel.vercel.app/openapi.yaml>。
 
 ## Expanded 15-question draft
 
@@ -106,7 +108,7 @@ Body：`{}`。在同一事务中验证完整输入与 revision、计算结果、
 }
 ```
 
-只为当前 session owner 且已经完成的 assessment 激活固定 demo plan。相同 key 重放不会再次延长期限；结果接口随后立即变为 full。
+只为当前 session owner 且已经完成的 assessment 激活固定测试 plan。相同 key 重放不会再次延长期限；结果接口随后立即变为 full。
 
 ## 可重放 cURL：从零到付费
 

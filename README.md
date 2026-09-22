@@ -2,18 +2,20 @@
 
 [![CI](https://github.com/RomanticD/health-assessment-funnel/actions/workflows/ci.yml/badge.svg)](https://github.com/RomanticD/health-assessment-funnel/actions/workflows/ci.yml)
 
-A production-minded health assessment funnel with recoverable progress, concurrency control, server-side health calculations, and entitlement-gated results. Anonymous visitors complete a 15-step assessment while the server persists progress, calculates BMI, energy guidance and a target projection, then returns structurally distinct preview/full DTOs from the current subscription entitlement.
+这是一个面向真实产品场景的健康测评漏斗：支持可恢复的答题进度、并发控制、服务端健康计算，以及按订阅权益返回不同结果。匿名用户完成 15 步测评后，服务端会持久化进度、计算 BMI、能量建议与目标预测，并根据当前订阅状态返回结构明确区分的 preview/full DTO。
 
-> Results provide general wellness estimates and are not medical diagnosis, treatment, or individualized clinical advice.
+> 结果仅提供一般性的健康生活方式估算，不构成医疗诊断、治疗建议或个体化临床意见。
 
 ## Live environment
 
 - Web：<https://health-assessment-funnel.vercel.app>
-- Seeded result-access preview（UI-only sandbox）：<https://health-assessment-funnel.vercel.app/demo/paywall>
+- Result access and checkout page（固定合成数据）：<https://health-assessment-funnel.vercel.app/demo/paywall>
 - GitHub：<https://github.com/RomanticD/health-assessment-funnel>
 - 健康检查：<https://health-assessment-funnel.vercel.app/api/health>
+- API reference（Swagger UI）：<https://health-assessment-funnel.vercel.app/api-docs>
+- OpenAPI 3.1 document：<https://health-assessment-funnel.vercel.app/openapi.yaml>
 - Supabase project ref：`kfyqgzuatywmsuruwsei`
-- Pre-authorized test session（已完成 15 题、已提交、已激活 sandbox subscription，数据库身份为 `demo_readonly`）：
+- Pre-authorized paid session（已完成 15 题、已提交、已激活测试订阅，数据库身份为 `demo_readonly`）：
   - `sessionId`: `Cm4dsRc3ybdSeNc3CPYuHVumgLi4HLQ6lnWy_s0eOAY`
   - `assessmentId`: `2378aded-3fab-4ed5-a958-ac73d09dddad`
   - 有效期至：`2026-10-22T11:46:35Z`（公开 fixture 30 天轮换窗口）
@@ -47,7 +49,7 @@ Landing
   → 15 个逐题保存的问题（目标、经验、习惯、偏好、身体数据）
   → review + 服务端计算
   → preview（无敏感预测字段 + 毛玻璃锁定预览）
-  → sandbox checkout
+  → checkout activation
   → full result（即时解锁）
 ```
 
@@ -157,7 +159,9 @@ erDiagram
 - [src/server/README.md](./src/server/README.md)：后端模块、认证、并发和扩展点
 - [supabase/README.md](./supabase/README.md)：迁移、连接、权限模型与数据库操作
 - [docs/api.md](./docs/api.md)：API 合约与完整 cURL 示例
-- [docs/openapi.yaml](./docs/openapi.yaml)：可导入工具的 OpenAPI 3.1 合约
+- [在线 API reference](https://health-assessment-funnel.vercel.app/api-docs)：Swagger UI 交互文档
+- [在线 OpenAPI 3.1 document](https://health-assessment-funnel.vercel.app/openapi.yaml)：可下载并导入工具
+- [docs/openapi.yaml](./docs/openapi.yaml)：仓库内版本化的 OpenAPI 3.1 合约
 - [docs/database.md](./docs/database.md)：Schema、ERD 与数据库不变量
 - [docs/deployment.md](./docs/deployment.md)：Supabase/Vercel/CI 部署与回滚
 - [docs/ai-retrospective.md](./docs/ai-retrospective.md)：AI 协作方法、验证证据和一次明确否决
@@ -169,11 +173,11 @@ erDiagram
 - assessment revision 使用乐观并发控制；相同幂等请求优先重放，乱序和冲突返回稳定错误码。
 - 健康算法只在服务端执行，输入与算法版本一并固化，结果不可变。
 - preview/full 分别从 allowlist 构造，非会员响应不会先获得完整对象再 `delete` 字段。
-- `/pay` 不接收金额、用户 ID 或订阅状态，只能为当前 session 所属且已完成的 assessment 激活固定 sandbox plan。
+- `/pay` 不接收金额、用户 ID 或订阅状态，只能为当前 session 所属且已完成的 assessment 激活固定测试 plan。
 
 ## 已知范围
 
-- 当前支付适配器执行 sandbox subscription activation，不连接外部支付渠道；接入生产支付商时必须验证 provider signature、事件顺序和退款/撤销。
+- 当前支付适配器执行测试订阅激活，不连接外部支付渠道；接入生产支付商时必须验证 provider signature、事件顺序和退款/撤销。
 - 普通匿名 session 为 7 天绝对 TTL；公开只读 fixture 使用独立 30 天轮换窗口。当前没有账号迁移、邮件登录或跨浏览器同步。
 - 算法提供透明、确定性的 wellness 估算，不处理孕期、疾病、药物或临床营养方案。
 - 当前版本聚焦数据流、并发、权限与测试闭环；分布式速率限制和长期数据清理任务属于后续生产强化项。

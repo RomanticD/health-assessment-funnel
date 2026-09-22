@@ -92,7 +92,7 @@ docs/
 - 内部 user UUID 不是凭证；
 - 普通 session 绝对 TTL 7 天，不静默滑动；有到期/管理员撤销时间；
 - 同时出现 Cookie 与 Bearer 且不一致时拒绝；Cookie 写请求在生产环境要求精确 `Origin`，纯 Bearer cURL 可不带 Origin；
-- 已支付公开 fixture 属于 `demo_readonly` 用户，所有写 RPC 在数据库层拒绝；README 明确这是“允许公开的合成 demo credential”例外；
+- 已支付公开 fixture 属于 `demo_readonly` 用户，所有写 RPC 在数据库层拒绝；README 明确这是“允许公开的合成测试凭证”例外；
 - 本版不做注册升级，也不预留未使用的 `auth_user_id` 列。
 
 ## ADR-003：强类型核心输入 + 扩展问答 JSONB

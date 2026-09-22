@@ -27,8 +27,8 @@ export default function PrivacyPage() {
         </p>
         <h2>About checkout</h2>
         <p>
-          This is a demonstration product. Checkout simulates access to the full summary. No money
-          is charged and no payment card is required.
+          Checkout unlocks the full summary in this experience. No money is charged, no payment card
+          is required, and no renewal is created.
         </p>
         <Link className="primary-action" href="/">
           Back to Kindred

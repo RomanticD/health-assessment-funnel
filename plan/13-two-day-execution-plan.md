@@ -137,7 +137,7 @@ GitHub Go/No-Go 已清除，功能编码可以开始；Vercel linkage 与 local 
 
 - 完成根 README、AI 复盘、ERD、OpenAPI、测试范围/限制、runbook。
 - secret scan、链接/命令复跑、private repo reviewer access。
-- 生成 `【姓名】_全栈挑战_YYYYMMDD` 和四邮箱草稿，由用户确认外发。
+- 生成 `Kindred-Health_delivery_YYYYMMDD.md` 和收件人草稿，由交付人确认外发。
 - 最后 30 分钟只跑全新浏览器/cookie jar：refresh restore、preview→pay→full、paid fixture read + all writes rejected。
 
 ## 关键提交留痕

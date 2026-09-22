@@ -2,7 +2,7 @@
 
 ## Supabase 基线
 
-- `Full Stack Demo` 是 organization；其中唯一可用项目是 `RomanticD's Project`，ref 为非密钥项目标识 `kfyqgzuatywmsuruwsei`。
+- 当前目标项目为 `RomanticD's Project`，ref 为非密钥项目标识 `kfyqgzuatywmsuruwsei`。
 - 项目为 `ACTIVE_HEALTHY`，PostgreSQL 17.6，规划审计时无业务表、migration、branch 或 Edge Function。
 - advisor 暂无告警只是因为数据库为空，不能视为安全证明。
 - `public` 默认 ACL 仍较宽；首个 migration 必须先改 default privileges，再创建业务对象并显式 grant。

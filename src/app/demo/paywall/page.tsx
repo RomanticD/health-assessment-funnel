@@ -1,7 +1,7 @@
 import { DemoPaywallExperience } from '@/components/results/demo-paywall-experience'
 
 export const metadata = {
-  title: 'Paywall UI test · Fixed mock',
+  title: 'Personal summary · Preview',
   robots: {
     index: false,
     follow: false,

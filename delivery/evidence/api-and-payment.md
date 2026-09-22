@@ -14,7 +14,7 @@
 完成 15 题 → submit → preview
     ↓ See your full summary
 UpgradeDialog（YOUR PERSONAL PLAN）
-    ↓ Unlock full summary — free demo
+    ↓ Unlock full summary — no charge
 POST /api/v1/pay
     ↓ 重新 GET result
 Your full summary + 完整 energy/timeline

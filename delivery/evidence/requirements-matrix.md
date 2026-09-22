@@ -1,6 +1,6 @@
 # 需求到实现 / 验收矩阵
 
-状态含义：`verified` = 有代码 + 自动化测试或线上 smoke；`implemented` = 已实现但需要评审者手工确认；`not-in-scope` = 明确不在 demo 范围。
+状态含义：`verified` = 有代码 + 自动化测试或线上 smoke；`implemented` = 已实现但需要评审者手工确认；`not-in-scope` = 明确不在当前产品范围。
 
 | 需求                                       | 实现位置                                                                                             | 验收证据                                                                              | 状态         |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------ |
@@ -19,4 +19,4 @@
 | GitHub Actions 一键门禁                    | `.github/workflows/ci.yml`                                                                           | [evidence/ci-and-production.md](ci-and-production.md)                                 | verified     |
 | 公网部署                                   | Vercel + Supabase                                                                                    | [evidence/ci-and-production.md](ci-and-production.md)                                 | verified     |
 | ERD / AI 复盘                              | `docs/database.md`、`docs/ai-retrospective.md`                                                       | [schema/assessment-erd.md](../schema/assessment-erd.md)、[ai-review.md](ai-review.md) | verified     |
-| 真实支付、账号、跨设备分享                 | 明确不实现                                                                                           | 使用固定 demo plan；不把 UUID 当 bearer token                                         | not-in-scope |
+| 真实支付、账号、跨设备分享                 | 当前版本明确不实现                                                                                   | 使用固定测试 plan；不把 UUID 当 bearer token                                          | not-in-scope |

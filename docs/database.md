@@ -140,7 +140,7 @@ RLS advisor 会把“RLS 已启用但无 policy”列为 INFO；本项目这是�
 
 索引覆盖 session hash、session expiry、active assessment、owner recent progress、assessment result、active entitlement、payment ownership、idempotency expiry/FK。新建空库会暂时收到 unused-index INFO，产生真实流量后再根据 `pg_stat_user_indexes` 判断，不能因为空库统计就删除约束/热路径索引。
 
-建议留存：普通 session 7 天有效；幂等记录 24 小时；未完成 assessment 30 天；演示 completed 数据 90 天。自动清理不是本挑战的公开 API，也不在仓库里假称已经调度。
+建议留存：普通 session 7 天有效；幂等记录 24 小时；未完成 assessment 30 天；合成 completed 数据 90 天。自动清理不是本产品的公开 API，当前只提供运维 runbook，不假称已有自动调度。
 
 ## Verified deployment evidence
 

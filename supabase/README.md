@@ -4,9 +4,9 @@ This directory is the database source of truth.
 
 - `migrations/`: ordered, forward-only schema and RPC changes.
 - `seed.sql`: synthetic local/CI reset fixtures only; it is not a production deployment mechanism.
-- Production demo data is provisioned only after a tested migration deployment; plaintext session credentials are never placed in migrations or `seed.sql`.
+- Synthetic paid fixture data is provisioned only after a tested migration deployment; plaintext session credentials are never placed in migrations or `seed.sql`.
 
-Target project: `kfyqgzuatywmsuruwsei` (`RomanticD's Project` in the `Full Stack Demo` organization).
+Target project: `kfyqgzuatywmsuruwsei` (`RomanticD's Project`).
 
 Security model:
 

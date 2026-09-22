@@ -102,9 +102,7 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
       paymentKeyRef.current = null
       closeDialog()
     } catch (error) {
-      setPaymentError(
-        `${resultErrorMessage(error)} If the demo checkout completed, retrying is safe.`,
-      )
+      setPaymentError(`${resultErrorMessage(error)} If checkout completed, retrying is safe.`)
     } finally {
       setIsPaying(false)
     }
@@ -387,8 +385,8 @@ export function PreviewResult({
           <p className="eyebrow">YOUR PERSONAL PLAN</p>
           <h2 id="locked-title">Unlock the complete picture.</h2>
           <p>
-            See the rest of your personal profile in this free demo. Nothing is charged and your
-            preview stays available if you choose not to continue.
+            See the rest of your personal profile. Nothing is charged and your preview stays
+            available if you choose not to continue.
           </p>
           <ul>
             <li className="paywall-list-heading">What’s included</li>
