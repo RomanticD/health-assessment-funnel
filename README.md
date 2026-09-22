@@ -1,5 +1,7 @@
 # Health Assessment Funnel
 
+[![CI](https://github.com/RomanticD/health-assessment-funnel/actions/workflows/ci.yml/badge.svg)](https://github.com/RomanticD/health-assessment-funnel/actions/workflows/ci.yml)
+
 睿迄科技全栈挑战的完整交付：一个可恢复、可并发控制、可模拟订阅解锁的健康测评 funnel。匿名访客逐步填写答案，服务端持久化进度并计算 BMI、建议摄入量与目标预测；结果接口按实时订阅状态返回结构不同的 preview/full DTO。
 
 > 本项目用于工程演示与健康教育，不构成医疗诊断、治疗或个体化医学建议。
