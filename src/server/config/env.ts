@@ -2,18 +2,32 @@ import 'server-only'
 
 import { z } from 'zod'
 
+const httpOriginSchema = z
+  .url()
+  .transform((value) => value.replace(/\/$/u, ''))
+  .refine((value) => {
+    const url = new URL(value)
+    return (url.protocol === 'http:' || url.protocol === 'https:') && url.origin === value
+  }, 'Expected an exact HTTP(S) origin without credentials, path, query or fragment')
+
 const serverEnvSchema = z
   .object({
-    APP_ORIGIN: z
-      .url()
-      .transform((value) => value.replace(/\/$/, ''))
-      .refine((value) => !value.includes('#'), 'APP_ORIGIN must not contain a fragment'),
+    APP_ORIGIN: httpOriginSchema,
     SUPABASE_URL: z.url(),
     SUPABASE_SECRET_KEY: z.string().min(20),
     VERCEL_GIT_COMMIT_SHA: z.string().min(1).default('local'),
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   })
   .strict()
+  .superRefine((environment, context) => {
+    if (environment.NODE_ENV === 'production' && !environment.APP_ORIGIN.startsWith('https://')) {
+      context.addIssue({
+        code: 'custom',
+        path: ['APP_ORIGIN'],
+        message: 'APP_ORIGIN must use HTTPS in production',
+      })
+    }
+  })
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>
 

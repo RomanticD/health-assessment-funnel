@@ -1,6 +1,7 @@
 import { ZodError, type ZodType } from 'zod'
 
 import { ApiProblem, validationProblem } from '@/server/http/problem'
+import { revisionSchema } from '@/shared/contracts'
 
 export const MAX_JSON_BODY_BYTES = 16 * 1024
 export const IDEMPOTENCY_KEY_PATTERN = /^[A-Za-z0-9._:-]{16,128}$/
@@ -88,6 +89,15 @@ export async function parseJsonBody<T>(request: Request, schema: ZodType<T>): Pr
   }
 }
 
+export function parseRequestValue<T>(value: unknown, schema: ZodType<T>): T {
+  try {
+    return schema.parse(value)
+  } catch (error) {
+    if (error instanceof ZodError) throw validationProblem(error)
+    throw error
+  }
+}
+
 export function requireIdempotencyKey(request: Request): string {
   const value = request.headers.get('idempotency-key')
   if (value === null || !IDEMPOTENCY_KEY_PATTERN.test(value)) {
@@ -123,7 +133,18 @@ export function requireRevision(request: Request): number {
     })
   }
 
-  return Number(match[1])
+  const revision = revisionSchema.safeParse(Number(match[1]))
+  if (!revision.success) {
+    throw new ApiProblem({
+      status: 400,
+      code: 'INVALID_PRECONDITION',
+      title: 'Invalid precondition',
+      detail: 'If-Match revision must be a non-negative safe integer.',
+      cause: revision.error,
+    })
+  }
+
+  return revision.data
 }
 
 export function assessmentEtag(revision: number): string {

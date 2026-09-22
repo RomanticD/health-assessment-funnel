@@ -1,5 +1,8 @@
 import { ZodError } from 'zod'
 
+import { ApplicationError, type ApplicationErrorOptions } from '@/server/application/errors'
+import { logStructured } from '@/server/infrastructure/logging/structured-logger'
+
 export interface FieldProblem {
   path: string
   message: string
@@ -17,31 +20,10 @@ export interface ProblemBody {
   meta?: Record<string, unknown>
 }
 
-interface ApiProblemOptions {
-  status: number
-  code: string
-  title: string
-  detail: string
-  errors?: FieldProblem[]
-  meta?: Record<string, unknown>
-  cause?: unknown
-}
-
-export class ApiProblem extends Error {
-  readonly status: number
-  readonly code: string
-  readonly title: string
-  readonly errors: FieldProblem[] | undefined
-  readonly meta: Record<string, unknown> | undefined
-
-  constructor(options: ApiProblemOptions) {
-    super(options.detail, { cause: options.cause })
+export class ApiProblem extends ApplicationError {
+  constructor(options: ApplicationErrorOptions) {
+    super(options)
     this.name = 'ApiProblem'
-    this.status = options.status
-    this.code = options.code
-    this.title = options.title
-    this.errors = options.errors
-    this.meta = options.meta
   }
 }
 
@@ -66,7 +48,7 @@ function problemType(code: string): string {
 
 export function toProblemResponse(error: unknown, traceId: string): Response {
   const problem =
-    error instanceof ApiProblem
+    error instanceof ApplicationError
       ? error
       : new ApiProblem({
           status: 500,
@@ -110,9 +92,12 @@ export async function withApiErrorBoundary(
   } catch (error) {
     // Only stable public errors cross this boundary. Stack traces, SQL details,
     // bearer credentials and health answers must never be serialized here.
-    if (!(error instanceof ApiProblem)) {
-      console.error('Unhandled API error', {
+    if (!(error instanceof ApplicationError) || error.status >= 500) {
+      logStructured('error', {
         traceId,
+        event: 'api.request.failed',
+        status: error instanceof ApplicationError ? error.status : 500,
+        errorCode: error instanceof ApplicationError ? error.code : 'UNEXPECTED_ERROR',
         errorName: error instanceof Error ? error.name : typeof error,
       })
     }
