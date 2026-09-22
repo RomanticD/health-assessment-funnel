@@ -34,7 +34,7 @@ Playwright 的三条场景分别验证完整 15 题漏斗、无需填写问卷�
 
 Playwright 配置开启 `failOnFlakyTests`（CI 环境）、CI retry 仅用于诊断冷启动问题、trace/screenshot/video retain-on-failure；因此 retry 后的 flaky 不会被当作绿色通过。
 
-最终已通过的 CI：[run #35734343090](https://github.com/RomanticD/health-assessment-funnel/actions/runs/35734343090)。该 run 的 quality 与 integration-e2e 均为 success；本地同样复跑 47 unit、21 integration、3 Chromium E2E。
+最终已通过的 CI：[run #35739988212](https://github.com/RomanticD/health-assessment-funnel/actions/runs/35739988212)。该 run 的 quality 与 integration-e2e 均为 success；本地同样复跑 47 unit、21 integration、3 Chromium E2E。
 
 ## 覆盖率与边界
 

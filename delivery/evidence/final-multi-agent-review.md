@@ -46,7 +46,7 @@ pnpm test:stack
 
 本次最终文档/API reference 变更的 commit `fcb8adc` 对应 run [#35732889517](https://github.com/RomanticD/health-assessment-funnel/actions/runs/35732889517) 已再次全绿；quality 与 integration-e2e 均成功，新增 OpenAPI 页面 E2E 也通过。
 
-包含最新交付证据的 commit `94d89e4` 对应 run [#35734343090](https://github.com/RomanticD/health-assessment-funnel/actions/runs/35734343090) 也已全绿，Playwright 链路为 3 个 Chromium 场景。
+包含最新交付证据的 commit `3b5a5c5` 对应 run [#35739988212](https://github.com/RomanticD/health-assessment-funnel/actions/runs/35739988212) 也已全绿，Playwright 链路为 3 个 Chromium 场景。
 
 ## 仍属于计划中的生产强化项
 
