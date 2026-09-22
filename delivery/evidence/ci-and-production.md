@@ -3,7 +3,7 @@
 ## CI
 
 - Workflow：`.github/workflows/ci.yml`
-- 本次发布 run：[#35700327086](https://github.com/RomanticD/health-assessment-funnel/actions/runs/35700327086)（commit `563a3c575f3f5ce29e4a3aed6bb7fa3d0cd8fa50`）
+- 本次发布 run：[#35700915227](https://github.com/RomanticD/health-assessment-funnel/actions/runs/35700915227)（commit `71a7961fb9097271d3aa33164aa994ea361b54d0`）
 - Quality job：format、lint、typecheck、unit coverage、production build
 - Integration/E2E job：Supabase stack、migration、HTTP 集成和 Chromium 全流程
 - GitHub Actions 页面：https://github.com/RomanticD/health-assessment-funnel/actions
@@ -14,7 +14,7 @@
 
 - URL：https://health-assessment-funnel.vercel.app
 - `/api/health` 返回 `status: "ok"`、`service: "health-assessment-funnel"`、当前 release commit
-- 当前线上 release：`563a3c575f3f5ce29e4a3aed6bb7fa3d0cd8fa50`（由 `/api/health` 只读确认）
+- `/api/health` 在验收时返回 `status: "ok"`；`release` 字段为当前 Vercel 部署 commit，随每次推送动态更新。
 - Supabase project ref：`kfyqgzuatywmsuruwsei`
 - 远端 migration：`20260922002212_initial_health_assessment_schema`
 - 远端业务表启用 RLS；浏览器只通过 Next server routes 访问 RPC
