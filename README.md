@@ -28,7 +28,7 @@ curl "$BASE/api/v1/assessments/$ASSESSMENT_ID/result" \
   -H "Authorization: Bearer $SESSION_ID"
 ```
 
-要在自己的 session 上重放支付闭环，先完成并提交 assessment，然后调用（`Idempotency-Key` 每次请求使用 16–128 位稳定值）：
+要在一个尚未支付的 session 上重放支付闭环，请先把下面的 `SESSION_ID` / `ASSESSMENT_ID` 换成该 session，并完成提交；然后调用（`Idempotency-Key` 每次请求使用 16–128 位稳定值）：
 
 ```bash
 curl -X POST "$BASE/api/v1/pay" \
