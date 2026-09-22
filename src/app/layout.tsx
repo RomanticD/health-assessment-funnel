@@ -4,10 +4,11 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'Health Assessment',
-    template: '%s · Health Assessment',
+    default: 'Kindred Health · Educational Wellness Snapshot',
+    template: '%s · Kindred Health',
   },
-  description: 'A transparent, resumable health assessment demo.',
+  description:
+    'A transparent, resumable health assessment demo with server-calculated results and explicit limitations.',
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

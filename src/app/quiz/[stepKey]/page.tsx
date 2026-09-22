@@ -1,4 +1,7 @@
-import Link from 'next/link'
+import { notFound } from 'next/navigation'
+
+import { QuizFlow } from '@/components/quiz/quiz-flow'
+import { assessmentStepKeySchema } from '@/shared/contracts'
 
 type QuizStepPageProps = {
   params: Promise<{ stepKey: string }>
@@ -7,19 +10,8 @@ type QuizStepPageProps = {
 export default async function QuizStepPage({ params }: QuizStepPageProps) {
   const { stepKey } = await params
 
-  return (
-    <main className="shell">
-      <section className="hero">
-        <p className="eyebrow">Assessment setup</p>
-        <h1>The {stepKey} step is being connected to the server contract.</h1>
-        <p className="lede">
-          The backend persistence flow is implemented before the final funnel interface replaces
-          this temporary route.
-        </p>
-        <Link className="primary-action" href="/">
-          Return home
-        </Link>
-      </section>
-    </main>
-  )
+  const parsedStep = assessmentStepKeySchema.safeParse(stepKey)
+  if (!parsedStep.success && stepKey !== 'review') notFound()
+
+  return <QuizFlow stepKey={parsedStep.success ? parsedStep.data : 'review'} />
 }
