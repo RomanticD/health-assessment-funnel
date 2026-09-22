@@ -19,6 +19,15 @@
 - 远端 migration：`20260922002212_initial_health_assessment_schema`、`20260922015929_expanded_funnel_answers`
 - 远端业务表启用 RLS；浏览器只通过 Next server routes 访问 RPC
 
+### Supabase advisors
+
+2026-09-22 远端 advisor 结果没有 WARN/ERROR：
+
+- Security INFO：10 张业务表启用 RLS 但没有 public policy。这是刻意的 server-only fail-closed 设计；`anon`/`authenticated` 不能直接读写业务表，服务端 RPC 仍在事务内从 session digest 派生 owner 并做 BOLA 校验。
+- Performance INFO：空/低流量数据库报告 3 个未使用索引（session expiry、assessment owner、idempotency owner）。这些索引覆盖实际热路径，不能因为当前验收流量少就删除；后续用 `pg_stat_user_indexes` 观察真实流量再决定。
+
+因此这些 INFO 是已解释的设计/基线提示，不是把 advisor 输出伪称为“无结果”。
+
 ## 发布后 smoke
 
 1. `GET /api/health`
