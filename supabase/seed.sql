@@ -1,0 +1,3 @@
+-- Intentionally empty. Local and CI scenarios create isolated users through
+-- service-role RPCs; production demo data is provisioned by a separate,
+-- explicit script so `supabase db reset` can never leak a reusable credential.
