@@ -44,6 +44,8 @@ pnpm test:stack
 
 修复后的 commit `d6aed85` 对应 run `35725526106` 已全绿：quality 与 integration-e2e 均成功，21 个 integration tests 和 2 个 Chromium E2E 首次通过，没有 flaky retry。
 
+本次最终文档/API reference 变更的 commit `fcb8adc` 对应 run [#35732889517](https://github.com/RomanticD/health-assessment-funnel/actions/runs/35732889517) 已再次全绿；quality 与 integration-e2e 均成功，新增 OpenAPI 页面 E2E 也通过。
+
 ## 仍属于计划中的生产强化项
 
 以下项目不是原始挑战的必交功能，当前没有被伪称为已完成：可自动 rotate 的线上 fixture CLI、自动 cleanup dry-run、自动 advisor/ACL/type-drift 检查和真实支付 provider webhook。当前通过 forward-only migrations、Supabase 手工受控 provisioning、文档化 runbook 和 CI 核心门禁覆盖；如果进入长期生产运营，应继续补齐这些运维自动化。
