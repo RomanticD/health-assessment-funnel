@@ -1,5 +1,7 @@
 # 01 · 需求可追踪矩阵
 
+> 这份 planning 快照保留了最初的 `planned` 标记以便回看执行过程；最终验收状态以 [`delivery/evidence/requirements-matrix.md`](../delivery/evidence/requirements-matrix.md) 为准，那里只标记已经有代码与测试/线上证据的项目。
+
 下表用于避免“功能做了，但无法证明”或“测试存在，但没覆盖题目要求”。实现阶段每项状态从 `planned` 更新为 `implemented` / `verified`，并链接代码或 CI 证据。
 
 | ID | 原始/隐含需求 | 设计落点 | 验收证据 | 状态 |

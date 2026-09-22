@@ -1,0 +1,22 @@
+# 需求到实现 / 验收矩阵
+
+状态含义：`verified` = 有代码 + 自动化测试或线上 smoke；`implemented` = 已实现但需要评审者手工确认；`not-in-scope` = 明确不在 demo 范围。
+
+| 需求                                       | 实现位置                                                                                             | 验收证据                                                                              | 状态         |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------ |
+| 15 题分步增量保存                          | `src/components/quiz/personal-quiz.tsx`、`src/app/api/v1/assessments/[assessmentId]/funnel/route.ts` | `tests/integration/persistence-api.test.ts`、`tests/e2e/funnel.spec.ts`               | verified     |
+| 中断后恢复 / 乱序 / 重复提交 / 并发        | funnel RPC + revision/ETag/idempotency                                                               | `tests/integration/persistence-api.test.ts`、`tests/integration/funnel-api.test.ts`   | verified     |
+| BMI、BMR/TDEE、建议摄入、目标日期          | `src/server/domain/health-assessment-v1.ts`                                                          | `tests/unit/health-assessment-v1.test.ts`、`tests/unit/result-projection.test.ts`     | verified     |
+| 计算结果持久化                             | `supabase/migrations/`、submit service                                                               | `tests/integration/access-payment-api.test.ts`、DB smoke                              | verified     |
+| 非会员脱敏 / 会员完整                      | `src/server/domain/result-projection.ts`、result route                                               | `tests/integration/access-payment-api.test.ts`（递归保护字段断言）                    | verified     |
+| `/pay` 模拟回调                            | `src/app/api/v1/pay/route.ts`、payment RPC                                                           | `tests/integration/access-payment-api.test.ts`、`tests/e2e/funnel.spec.ts`            | verified     |
+| 非法数值与目标方向                         | strict Zod + PostgreSQL CHECK/RPC                                                                    | `tests/unit/health-assessment-v1.test.ts`、integration invalid input cases            | verified     |
+| API Problem Details / no-store / CSRF      | `src/server/http/`、route headers                                                                    | `tests/integration/http-boundaries.test.ts`                                           | verified     |
+| BOLA / RLS fail-closed / demo read-only    | owner-bound RPC + RLS migration                                                                      | integration DB ACL/BOLA cases、`docs/database.md`                                     | verified     |
+| 当前题目 URL 可恢复                        | `syncQuestionUrl()`、`src/app/quiz/[stepKey]/page.tsx`                                               | same-browser refresh E2E；无 Cookie 结果接口边界测试                                  | implemented  |
+| 全宽 header / values strip / pressed state | `src/app/studio.css`                                                                                 | `evidence/ui-acceptance.md` + live browser review                                     | implemented  |
+| summary editorial layout + chart animation | `src/components/results/result-experience.tsx`、`src/app/studio.css`                                 | reduced-motion CSS、E2E full result、live browser review                              | implemented  |
+| GitHub Actions 一键门禁                    | `.github/workflows/ci.yml`                                                                           | [evidence/ci-and-production.md](ci-and-production.md)                                 | verified     |
+| 公网部署                                   | Vercel + Supabase                                                                                    | [evidence/ci-and-production.md](ci-and-production.md)                                 | verified     |
+| ERD / AI 复盘                              | `docs/database.md`、`docs/ai-retrospective.md`                                                       | [schema/assessment-erd.md](../schema/assessment-erd.md)、[ai-review.md](ai-review.md) | verified     |
+| 真实支付、账号、跨设备分享                 | 明确不实现                                                                                           | 使用固定 demo plan；不把 UUID 当 bearer token                                         | not-in-scope |

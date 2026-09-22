@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { randomUUID } from 'node:crypto'
 
 import {
   baseUrl,
@@ -14,6 +15,11 @@ import {
 describe('HTTP boundary validation', () => {
   it('requires authentication for protected resources', async () => {
     const result = await request('/api/v1/assessments/current')
+    expectProblem(result, 401, 'SESSION_REQUIRED')
+  })
+
+  it('does not treat an assessment URL as a bearer credential', async () => {
+    const result = await request(`/api/v1/assessments/${randomUUID()}/result`)
     expectProblem(result, 401, 'SESSION_REQUIRED')
   })
 

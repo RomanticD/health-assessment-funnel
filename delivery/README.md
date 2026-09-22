@@ -1,0 +1,77 @@
+# Kindred Health · 交付验收入口
+
+> 交付日期：2026-09-22 · 版本基线：`main`
+
+这是本次全栈挑战的验收入口。所有健康数据均为合成 demo 数据；浏览器 session 使用 HttpOnly Cookie，URL 不承载 bearer credential、支付凭证或健康数值。
+
+## 线上与仓库
+
+- 公网演示：https://health-assessment-funnel.vercel.app
+- GitHub：https://github.com/RomanticD/health-assessment-funnel
+- 健康检查：https://health-assessment-funnel.vercel.app/api/health
+- 设计/产品复审：[plan/16-p0-product-review.md](../plan/16-p0-product-review.md)
+
+## 评审者 5 分钟路径
+
+1. 打开公网链接，点击 `Find my starting point`，完成 15 道题。
+2. 结果页先展示可读的免费预览；首屏下方直接出现 `DEMO CHECKOUT · $0` 和 `Explore my full summary`，无需猜测付费入口。
+3. 打开弹窗，确认 `No card · No charge · No renewal`，点击 `Unlock my summary — free demo`。
+4. 支付后页面重新读取结果，徽标变为 `Your full summary`，出现完整能量数值和带绘制动画的目标曲线。
+5. 刷新结果页，full entitlement 仍然有效。
+
+## 已支付 demo session（只读 fixture）
+
+这是题目要求的可重放合成凭证，不是 Supabase key，也不应被用于真实用户。它由 `demo_readonly` 数据库角色绑定，所有保存、提交、支付写入都会在事务 RPC 层拒绝。
+
+```text
+sessionId:   Uav5FgH_vRvjSAe1KvV6lWjUGaVO1-aZXfCXfzxGNiQ
+assessmentId: 99497ec4-9e5b-4b6a-a15d-e153323baf2b
+expiresAt:   2026-09-29T02:27:15Z
+```
+
+读取完整结果：
+
+```bash
+export BASE_URL=https://health-assessment-funnel.vercel.app
+export SESSION_ID='Uav5FgH_vRvjSAe1KvV6lWjUGaVO1-aZXfCXfzxGNiQ'
+export ASSESSMENT_ID='99497ec4-9e5b-4b6a-a15d-e153323baf2b'
+
+curl --fail-with-body "$BASE_URL/api/v1/assessments/$ASSESSMENT_ID/result" \
+  -H "Authorization: Bearer $SESSION_ID" | jq
+```
+
+响应应包含 `access: "full"`、`bmrKcal`、`tdeeKcal`、`exactDailyCalories`、`targetDate` 和 `weightProjection`。使用另一个未付费 session 读取同类 assessment 时，响应只允许 `access: "preview"` 与 `lockedFeatures`。
+
+## `/pay` 可重放闭环
+
+对新 session 的完整 cURL（先完成四个核心 step 并提交，再支付）见 [docs/api.md](../docs/api.md)。固定 plan 只接受 `demo_monthly`，每个写请求必须提供稳定的 `Idempotency-Key`；重复同 key 同 body 是安全重放，不会重复延长订阅。
+
+浏览器中的按钮调用的就是同一接口：`POST /api/v1/pay` → 重新 `GET /api/v1/assessments/{assessmentId}/result`。UI 从服务端 `access` 字段决定 preview/full，不在客户端自行设置订阅状态。
+
+## 交付物索引
+
+| 交付项                         | 证据                                                                                                                                                                                                                 |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 公网链接、GitHub、paid session | 本页顶部与 demo session 区块                                                                                                                                                                                         |
+| API 文档与 cURL                | [docs/api.md](../docs/api.md)、[docs/openapi.yaml](../docs/openapi.yaml)、[evidence/api-and-payment.md](evidence/api-and-payment.md)                                                                                 |
+| 15 题分步保存/恢复             | [evidence/requirements-matrix.md](evidence/requirements-matrix.md)、[src/components/quiz/personal-quiz.tsx](../src/components/quiz/personal-quiz.tsx)                                                                |
+| 订阅鉴权与差异化结果           | [evidence/api-and-payment.md](evidence/api-and-payment.md)、[tests/integration/access-payment-api.test.ts](../tests/integration/access-payment-api.test.ts)、[tests/e2e/funnel.spec.ts](../tests/e2e/funnel.spec.ts) |
+| 测试与边界覆盖                 | [evidence/test-map.md](evidence/test-map.md)                                                                                                                                                                         |
+| 数据库 Schema 图               | [schema/assessment-erd.md](schema/assessment-erd.md)、[docs/database.md](../docs/database.md)                                                                                                                        |
+| CI / 部署 / smoke              | [evidence/ci-and-production.md](evidence/ci-and-production.md)                                                                                                                                                       |
+| AI 使用复盘                    | [docs/ai-retrospective.md](../docs/ai-retrospective.md)、[evidence/ai-review.md](evidence/ai-review.md)                                                                                                              |
+| UI 验收与参考图                | [evidence/ui-acceptance.md](evidence/ui-acceptance.md)、[references/](references/)                                                                                                                                   |
+
+## URL 与隐私边界
+
+题目要求的“复制地址恢复”采用同浏览器恢复，而不是把 session 当作 URL token：
+
+- 题目 URL 只表达当前导航，例如 `/quiz/ageYears`、`/quiz/review`。
+- 结果 URL 可以包含 assessment UUID，但 UUID 不是授权凭证；服务端仍要求当前浏览器的 HttpOnly session。
+- 新浏览器或无 Cookie 复制链接时，结果接口返回统一的 session-required / private-session 文案，不能读取健康数据。
+- `sessionId`、`order`、支付幂等 key、订阅状态、年龄、身高、体重和完整答案不进入 URL、localStorage 或 sessionStorage。
+- 若未来需要跨设备分享，应新增短期、一次性、可撤销的 signed resume token；本 demo 不用 assessment UUID 冒充授权。
+
+## 已知边界
+
+这是教育性 wellness demo，不是医疗诊断或真实收费产品。目标日期和热量是服务端估算，不能替代医生或注册营养师意见；公开 paid fixture 是合成只读数据，按到期时间轮换。

@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -144,46 +145,31 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
   return (
     <main className="result-page">
       <SiteHeader compact />
-      <div className="result-wrap">
+      <div className="result-wrap result-editorial">
         <header className="result-heading">
-          <p className="eyebrow">Your wellness snapshot</p>
-          <h1>
-            {result.access === 'full'
-              ? 'Your next chapter starts here.'
-              : 'Your personal starting point.'}
-          </h1>
-          <p>Small steps, chosen around your goals and everyday life.</p>
+          <p className="eyebrow">YOUR WELLNESS PROFILE</p>
+          <h1>Here’s your wellness profile</h1>
+          <p>
+            A clear starting point for the way you want to move, feel, and make room for yourself.
+          </p>
           <span
             className={
               result.access === 'full' ? 'access-badge access-badge--full' : 'access-badge'
             }
           >
-            {result.access === 'full' ? 'Your full summary' : 'Your first look'}
+            {result.access === 'full' ? 'Your full summary' : 'Your free preview'}
           </span>
         </header>
 
-        {preferences?.experience && <RoutineSummary answers={preferences} />}
-
-        <section className="result-overview" aria-label="BMI overview">
-          <div className="bmi-orbit" aria-hidden="true">
-            <span>{result.bmi}</span>
-            <small>BMI</small>
-          </div>
-          <div>
-            <p className="metric-label">BMI reference category</p>
-            <h2>{BMI_LABELS[result.bmiCategory]}</h2>
-            <p>
-              One part of your starting point. Your energy, strength, and everyday wellbeing matter
-              too.
-            </p>
-          </div>
-        </section>
+        <ResultProfile result={result} answers={preferences} />
 
         {result.access === 'preview' ? (
           <PreviewResult result={result} onUnlock={openDialog} />
         ) : (
           <FullResult result={result} />
         )}
+
+        {preferences?.experience && <RoutineSummary answers={preferences} />}
 
         <EducationalFooter />
       </div>
@@ -201,71 +187,165 @@ export function ResultExperience({ assessmentId }: { assessmentId: string }) {
   )
 }
 
+function ResultProfile({
+  result,
+  answers,
+}: {
+  result: ResultAccessData
+  answers: FunnelAnswers | null
+}) {
+  return (
+    <section className="result-profile" aria-label="Your starting profile">
+      <div className="result-profile-copy">
+        <BmiScale bmi={result.bmi} category={result.bmiCategory} />
+        {answers && <ProfileFacts answers={answers} />}
+      </div>
+      <div className="result-profile-photo">
+        <Image
+          src="/pilates-studio.png"
+          alt="A calm, supported movement practice"
+          fill
+          sizes="(max-width: 760px) 100vw, 38vw"
+        />
+        <span>Made for your everyday</span>
+      </div>
+    </section>
+  )
+}
+
+function BmiScale({ bmi, category }: { bmi: number; category: BmiCategory }) {
+  const marker = Math.max(0, Math.min(100, ((bmi - 15) / 25) * 100))
+  return (
+    <section className="bmi-scale" aria-labelledby="bmi-scale-title">
+      <p className="eyebrow">A useful starting point</p>
+      <div className="bmi-scale-heading">
+        <div>
+          <h2 id="bmi-scale-title">Body Mass Index</h2>
+          <p>{BMI_LABELS[category]}</p>
+        </div>
+        <strong>{bmi.toFixed(1)}</strong>
+      </div>
+      <div className="bmi-scale-visual">
+        <div className="bmi-scale-track" aria-hidden="true">
+          <span className="bmi-scale-marker" style={{ left: `${marker}%` }} />
+        </div>
+        <div className="bmi-scale-ticks" aria-hidden="true">
+          <span>15</span>
+          <span>18.5</span>
+          <span>25</span>
+          <span>30</span>
+          <span>40</span>
+        </div>
+        <div className="bmi-scale-labels">
+          <span>Below</span>
+          <span>Reference range</span>
+          <span>Above</span>
+        </div>
+      </div>
+      <p className="bmi-scale-note">
+        BMI is one context point, not a complete picture of your health or how you feel.
+      </p>
+    </section>
+  )
+}
+
+function ProfileFacts({ answers }: { answers: FunnelAnswers }) {
+  const facts = [
+    answers.experience && ['Starting point', answerLabel('experience', answers.experience)],
+    answers.activityLevel && [
+      'Movement rhythm',
+      answerLabel('activityLevel', answers.activityLevel),
+    ],
+    answers.minutes &&
+      answers.days && [
+        'Weekly intention',
+        `${answerLabel('minutes', answers.minutes)} · ${answerLabel('days', answers.days)}`,
+      ],
+    answers.focus && ['Focus', answerLabel('focus', answers.focus)],
+    answers.equipment && ['At home', answerLabel('equipment', answers.equipment)],
+  ].filter((fact): fact is [string, string] => Boolean(fact?.[0] && fact[1]))
+
+  if (facts.length === 0) return null
+  return (
+    <div className="profile-facts" aria-label="Movement preferences">
+      <p className="eyebrow">Your everyday rhythm</p>
+      <dl>
+        {facts.map(([label, value]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  )
+}
+
 function PreviewResult({ result, onUnlock }: { result: PreviewResultData; onUnlock: () => void }) {
+  const lockedFeatures =
+    result.calorieRange === null
+      ? ['Your energy at rest', 'Your daily energy overview']
+      : result.warnings.length > 0
+        ? ['Your daily energy target', 'Your daily energy overview']
+        : ['Your daily energy target', 'Your estimated timeline', 'Your progress outlook']
+
   return (
     <>
-      <section className="preview-grid" aria-label="Free result preview">
-        <article className="metric-card metric-card--accent">
-          <p className="metric-label">Your daily energy guide</p>
-          {result.calorieRange === null ? (
-            <strong>Individual guidance recommended</strong>
-          ) : (
+      <section className="preview-summary" aria-label="Free result preview">
+        <div className="section-heading">
+          <p className="eyebrow">YOUR FREE PREVIEW</p>
+          <h2>A clear place to begin.</h2>
+          <p>Small, repeatable changes can fit more naturally into everyday life.</p>
+        </div>
+        <div className="preview-stat-list">
+          <div>
+            <span>Daily energy guide</span>
             <strong>
-              {result.calorieRange.min.toLocaleString()}–{result.calorieRange.max.toLocaleString()}
-              <small> kcal / day</small>
+              {result.calorieRange === null
+                ? 'Personal guidance'
+                : `${result.calorieRange.min.toLocaleString()}–${result.calorieRange.max.toLocaleString()} kcal`}
             </strong>
-          )}
-          <p>A starting range to support your chosen goal and everyday activity.</p>
-        </article>
-        <article className="metric-card">
-          <p className="metric-label">A sustainable pace</p>
-          <h2>Gradual beats dramatic.</h2>
-          <p>
-            Give yourself room to build a routine you enjoy. Small, repeatable changes can fit more
-            naturally into everyday life.
-          </p>
-        </article>
+            <small>A supportive range, not a prescription.</small>
+          </div>
+          <div>
+            <span>A sustainable pace</span>
+            <strong>Gradual beats dramatic.</strong>
+            <small>Give your routine room to become yours.</small>
+          </div>
+        </div>
       </section>
 
       <Warnings warnings={result.warnings} />
 
-      <section className="locked-panel" aria-labelledby="locked-title">
-        <div className="locked-copy">
-          <div className="lock-symbol" aria-hidden="true">
-            <svg viewBox="0 0 28 28" focusable="false">
-              <path d="M9.5 12V8.75a4.5 4.5 0 0 1 9 0V12M7 12h14v11H7z" />
-            </svg>
-          </div>
-          <p className="eyebrow">Your next step</p>
-          <h2 id="locked-title">See where your next chapter could take you.</h2>
+      <section className="paywall-callout" aria-labelledby="locked-title">
+        <div className="paywall-callout-copy">
+          <p className="eyebrow">DEMO CHECKOUT · $0</p>
+          <h2 id="locked-title">Unlock the complete picture.</h2>
           <p>
-            {result.calorieRange === null
-              ? 'Explore your daily energy overview alongside your personal movement suggestions. A calorie target and timeline aren’t available for this assessment.'
-              : result.warnings.length > 0
-                ? 'Explore your personal energy guide. A target-date prediction isn’t available for this goal.'
-                : 'Explore your personal energy target and estimated progress, all in one place.'}
+            See the rest of your personal profile in this free demo. Nothing is charged and your
+            preview stays available if you choose not to continue.
           </p>
+          <ul>
+            {lockedFeatures.map((label) => (
+              <li key={label}>{label}</li>
+            ))}
+          </ul>
           <button className="primary-action" type="button" onClick={onUnlock}>
             Explore my full summary
             <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
               <path d="m7.5 4.5 5 5-5 5" />
             </svg>
           </button>
+          <small>No card · No charge · No renewal</small>
         </div>
-        <div className="locked-stack" aria-label="Locked result sections">
-          {(result.calorieRange === null
-            ? ['Your energy at rest', 'Your daily energy overview']
-            : result.warnings.length > 0
-              ? ['Your daily energy target', 'Your daily energy overview']
-              : ['Your daily energy target', 'Your estimated timeline', 'Your progress outlook']
-          ).map((label) => (
-            <div key={label}>
-              <span>{label}</span>
-              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                <path d="M7 9V7a3 3 0 0 1 6 0v2M5.5 9h9v7h-9z" />
-              </svg>
-            </div>
-          ))}
+        <div className="paywall-callout-side" aria-hidden="true">
+          <span className="paywall-lock">
+            <svg viewBox="0 0 28 28" focusable="false">
+              <path d="M9.5 12V8.75a4.5 4.5 0 0 1 9 0V12M7 12h14v11H7z" />
+            </svg>
+          </span>
+          <strong>Your full plan</strong>
+          <span>Ready when you are</span>
         </div>
       </section>
     </>
@@ -275,38 +355,37 @@ function PreviewResult({ result, onUnlock }: { result: PreviewResultData; onUnlo
 function FullResult({ result }: { result: FullResultData }) {
   return (
     <>
-      <section className="full-metrics" aria-label="Full energy estimate">
-        <MetricCard
-          label="Energy at rest"
-          value={result.bmrKcal.toLocaleString()}
-          unit="kcal / day"
-        />
-        <MetricCard
-          label="Daily energy estimate"
-          value={result.tdeeKcal.toLocaleString()}
-          unit="kcal / day"
-        />
-        <MetricCard
-          label="Your daily energy target"
-          value={result.exactDailyCalories?.toLocaleString() ?? 'Unavailable'}
-          unit={result.exactDailyCalories === null ? 'See guidance below' : 'kcal / day'}
-          featured
-        />
+      <section className="energy-summary" aria-labelledby="energy-summary-title">
+        <div className="section-heading">
+          <p className="eyebrow">YOUR DAILY RHYTHM</p>
+          <h2 id="energy-summary-title">Numbers to help you plan.</h2>
+          <p>These are gentle estimates to help you choose a direction, not rules to follow.</p>
+        </div>
+        <div className="energy-rows">
+          <MetricRow label="Energy at rest" value={result.bmrKcal.toLocaleString()} />
+          <MetricRow label="Daily energy estimate" value={result.tdeeKcal.toLocaleString()} />
+          <MetricRow
+            label="Your daily energy target"
+            value={result.exactDailyCalories?.toLocaleString() ?? 'Unavailable'}
+            featured
+          />
+        </div>
       </section>
 
       {result.calorieEstimateAvailable ? (
-        <section className="timeline-panel" aria-labelledby="timeline-title">
+        <section className="timeline-editorial" aria-labelledby="timeline-title">
           <div className="timeline-copy">
-            <p className="eyebrow">Estimated direction</p>
+            <p className="eyebrow">A GENTLE DIRECTION</p>
             <h2 id="timeline-title">
               {result.targetDate === null
                 ? result.warnings.includes('MAINTENANCE_GOAL_NO_ARRIVAL_DATE')
-                  ? 'Maintain a steady range.'
-                  : 'Take a longer-term view.'
+                  ? 'A steady range, not an arrival date.'
+                  : 'This goal deserves a longer horizon.'
                 : `An estimated target date of ${formatDate(result.targetDate)}.`}
             </h2>
             <p>
-              Think of this as a direction to work toward. Your pace may change, and that is okay.
+              This is an estimate to help you choose a direction. Your pace may change, and that is
+              okay.
             </p>
             {result.calorieRange !== null && (
               <p className="range-note">
@@ -341,23 +420,21 @@ function FullResult({ result }: { result: FullResultData }) {
   )
 }
 
-function MetricCard({
+function MetricRow({
   label,
   value,
-  unit,
   featured = false,
 }: {
   label: string
   value: string
-  unit: string
   featured?: boolean
 }) {
   return (
-    <article className={featured ? 'metric-card metric-card--accent' : 'metric-card'}>
-      <p className="metric-label">{label}</p>
+    <div className={featured ? 'energy-row energy-row--featured' : 'energy-row'}>
+      <span>{label}</span>
       <strong>{value}</strong>
-      <small>{unit}</small>
-    </article>
+      <small>kcal / day</small>
+    </div>
   )
 }
 
@@ -370,13 +447,20 @@ function ProjectionChart({ points }: { points: WeightProjectionPoint[] }) {
   const right = 698
   const top = 18
   const bottom = 188
-  const polyline = points
-    .map((point, index) => {
-      const x = left + (index / Math.max(points.length - 1, 1)) * (right - left)
-      const y = bottom - ((point.weightKg - minimum) / range) * (bottom - top)
-      return `${x.toFixed(1)},${y.toFixed(1)}`
-    })
+  const coordinates = points.map((point, index) => {
+    const x = left + (index / Math.max(points.length - 1, 1)) * (right - left)
+    const y = bottom - ((point.weightKg - minimum) / range) * (bottom - top)
+    return { x: Number(x.toFixed(1)), y: Number(y.toFixed(1)) }
+  })
+  const linePath = coordinates
+    .map(({ x, y }, index) => `${index === 0 ? 'M' : 'L'} ${x} ${y}`)
     .join(' ')
+  const firstCoordinate = coordinates[0]
+  const lastCoordinate = coordinates.at(-1)
+  const areaPath =
+    firstCoordinate && lastCoordinate
+      ? `${linePath} L ${lastCoordinate.x} ${bottom} L ${firstCoordinate.x} ${bottom} Z`
+      : ''
   const first = points[0]
   const last = points.at(-1)
 
@@ -393,23 +477,36 @@ function ProjectionChart({ points }: { points: WeightProjectionPoint[] }) {
             ? 'No projection points.'
             : `An estimate from ${first.weightKg} kilograms on ${first.date} to ${last.weightKg} kilograms on ${last.date}.`}
         </desc>
+        <defs>
+          <linearGradient id="projection-line-gradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#ef4c20" />
+            <stop offset="48%" stopColor="#f6c331" />
+            <stop offset="100%" stopColor="#27c9a4" />
+          </linearGradient>
+          <linearGradient id="projection-fill-gradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#f1a35a" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="#f1a35a" stopOpacity="0" />
+          </linearGradient>
+        </defs>
         <path className="chart-grid" d="M22 18H698M22 103H698M22 188H698" />
-        <polyline className="chart-line" points={polyline} />
-        {first !== undefined && (
-          <circle
-            className="chart-dot"
-            cx={left}
-            cy={bottom - ((first.weightKg - minimum) / range) * (bottom - top)}
-            r="5"
-          />
+        {areaPath && <path className="chart-area" d={areaPath} />}
+        <path className="chart-line" d={linePath} pathLength="1000" />
+        {first !== undefined && firstCoordinate && (
+          <circle className="chart-dot" cx={firstCoordinate.x} cy={firstCoordinate.y} r="5" />
         )}
-        {last !== undefined && (
-          <circle
-            className="chart-dot"
-            cx={right}
-            cy={bottom - ((last.weightKg - minimum) / range) * (bottom - top)}
-            r="5"
-          />
+        {last !== undefined && lastCoordinate && (
+          <circle className="chart-dot" cx={lastCoordinate.x} cy={lastCoordinate.y} r="5" />
+        )}
+        {last !== undefined && lastCoordinate && (
+          <g
+            className="chart-goal-tag"
+            transform={`translate(${Math.max(left, lastCoordinate.x - 138)} ${Math.max(top, lastCoordinate.y - 48)})`}
+          >
+            <rect width="128" height="32" rx="16" />
+            <text x="64" y="21" textAnchor="middle">
+              Goal · {last.weightKg} kg
+            </text>
+          </g>
         )}
       </svg>
       {first !== undefined && last !== undefined && (
@@ -460,58 +557,65 @@ function EducationalFooter() {
 }
 
 function RoutineSummary({ answers }: { answers: FunnelAnswers }) {
+  const guidance = [
+    answers.experience === 'new'
+      ? 'Begin with a gentle introduction to breathing, posture, and controlled movement.'
+      : answers.experience === 'some'
+        ? 'Revisit familiar basics before adding more challenging movements.'
+        : 'Keep a mix of familiar practice and recovery in your weekly routine.',
+    `Set aside ${answers.minutes} minutes on ${answers.days} days each week. ${
+      answers.equipment === 'none'
+        ? 'Choose a comfortable, non-slip space; a supportive mat can help with floor work.'
+        : answers.equipment === 'bands'
+          ? 'Start with your mat; add light resistance only when movement feels comfortable.'
+          : 'Keep your mat somewhere easy to reach as a reminder to begin.'
+    }`,
+    answers.sitting === 'mostly'
+      ? 'Break up long periods of sitting with short, comfortable movement breaks.'
+      : answers.sitting === 'some'
+        ? 'Use a short movement break to add variety to your day.'
+        : 'Balance your active day with a gentle cooldown and rest.',
+    answers.focus?.includes('whole_body')
+      ? 'Explore a balanced mix of whole-body movements.'
+      : `Build your practice around ${answerLabel('focus', answers.focus).toLowerCase()}, alongside balanced movement.`,
+  ]
+
+  if (answers.barriers?.includes('time')) {
+    guidance.push(
+      'Pair your practice with a daily cue, such as finishing work, to make time easier to find.',
+    )
+  }
+  if (answers.barriers?.includes('consistency')) {
+    guidance.push(
+      'Put your chosen days in your calendar. Missing one day does not mean starting over.',
+    )
+  }
+  if (answers.barriers?.includes('confidence')) {
+    guidance.push('Look for beginner instruction and take time to learn each movement comfortably.')
+  }
+
   return (
-    <section className="routine-card">
-      <p className="eyebrow">YOUR EVERYDAY MOVEMENT</p>
-      <h2>A little space for what matters to you.</h2>
-      <div className="routine-tags">
+    <section className="routine-editorial">
+      <div className="section-heading">
+        <p className="eyebrow">YOUR EVERYDAY MOVEMENT</p>
+        <h2>A little space for what matters to you.</h2>
+        <p>Your focus: {answerLabel('motivation', answers.motivation)}.</p>
+      </div>
+      <div className="routine-facts">
         {(['experience', 'minutes', 'days', 'equipment'] as const).map(
-          (key) => answers[key] && <span key={key}>{answerLabel(key, answers[key])}</span>,
+          (key) =>
+            answers[key] && (
+              <div key={key}>
+                <span>{key === 'minutes' ? 'Time' : key === 'days' ? 'Rhythm' : key}</span>
+                <strong>{answerLabel(key, answers[key])}</strong>
+              </div>
+            ),
         )}
       </div>
-      <p>Your focus: {answerLabel('motivation', answers.motivation)}.</p>
-      <ul>
-        <li>
-          {answers.experience === 'new'
-            ? 'Begin with a gentle introduction to breathing, posture, and controlled movement.'
-            : answers.experience === 'some'
-              ? 'Revisit familiar basics before adding more challenging movements.'
-              : 'Keep a mix of familiar practice and recovery in your weekly routine.'}
-        </li>
-        <li>
-          Set aside {answers.minutes} minutes on {answers.days} days each week.{' '}
-          {answers.equipment === 'none'
-            ? 'Choose a comfortable, non-slip space; a supportive mat can help with floor work.'
-            : answers.equipment === 'bands'
-              ? 'Start with your mat; add light resistance only when movement feels comfortable.'
-              : 'Keep your mat somewhere easy to reach as a reminder to begin.'}
-        </li>
-        <li>
-          {answers.sitting === 'mostly'
-            ? 'Break up long periods of sitting with short, comfortable movement breaks.'
-            : answers.sitting === 'some'
-              ? 'Use a short movement break to add variety to your day.'
-              : 'Balance your active day with a gentle cooldown and rest.'}
-        </li>
-        <li>
-          {answers.focus?.includes('whole_body')
-            ? 'Explore a balanced mix of whole-body movements.'
-            : `Build your practice around ${answerLabel('focus', answers.focus).toLowerCase()}, alongside balanced movement.`}
-        </li>
-        {answers.barriers?.includes('time') && (
-          <li>
-            Pair your practice with a daily cue, such as finishing work, to make time easier to
-            find.
-          </li>
-        )}
-        {answers.barriers?.includes('consistency') && (
-          <li>
-            Put your chosen days in your calendar. Missing one day does not mean starting over.
-          </li>
-        )}
-        {answers.barriers?.includes('confidence') && (
-          <li>Look for beginner instruction and take time to learn each movement comfortably.</li>
-        )}
+      <ul className="routine-guidance">
+        {guidance.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
       </ul>
     </section>
   )

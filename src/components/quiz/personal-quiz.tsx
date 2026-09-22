@@ -28,6 +28,17 @@ const firstMissing = (answers: FunnelAnswers) => {
   return i < 0 ? QUESTIONS.length : i
 }
 
+function syncQuestionUrl(progress: AssessmentProgress, questionIndex: number) {
+  if (typeof window === 'undefined') return
+  const question = QUESTIONS[questionIndex]
+  const routeStep =
+    questionIndex >= QUESTIONS.length ? 'review' : (question?.key ?? progress.nextStep ?? 'sex')
+  const url = new URL(window.location.href)
+  url.pathname = `/quiz/${routeStep}`
+  url.search = ''
+  window.history.replaceState(window.history.state, '', url)
+}
+
 export function PersonalQuiz() {
   const router = useRouter()
   const [progress, setProgress] = useState<AssessmentProgress | null>(null)
@@ -68,19 +79,36 @@ export function PersonalQuiz() {
     if (snapshot) heading.current?.focus()
   }, [index, snapshot])
 
+  useEffect(() => {
+    if (progress !== null) syncQuestionUrl(progress, index)
+  }, [index, progress])
+
   async function save(value: unknown) {
     if (!progress || !snapshot || pending.current) return
     const question = QUESTIONS[index]
     if (!question) return
+    const previousIndex = index
+    const wasEditing = editing.current
+    const advanceImmediately = question.type !== 'multi'
     pending.current = true
     setBusy(true)
     setError(null)
+    if (advanceImmediately) {
+      setIndex(wasEditing ? QUESTIONS.length : index + 1)
+      editing.current = false
+    }
     try {
       const response = await saveFunnel(progress.assessmentId, snapshot, question.key, value)
       setSnapshot(response.data)
-      setIndex(editing.current ? QUESTIONS.length : index + 1)
-      editing.current = false
+      if (!advanceImmediately) {
+        setIndex(wasEditing ? QUESTIONS.length : previousIndex + 1)
+        editing.current = false
+      }
     } catch (cause) {
+      if (advanceImmediately) {
+        setIndex(previousIndex)
+        editing.current = wasEditing
+      }
       if (isHealthApiError(cause) && cause.code === 'REVISION_MISMATCH') {
         try {
           const saved = await getFunnel(progress.assessmentId)
@@ -446,11 +474,17 @@ function QuestionInput({
                 {busy && active ? (
                   <span className="button-spinner" />
                 ) : active ? (
-                  '✓'
+                  <svg viewBox="0 0 20 20" focusable="false">
+                    <path d="m4 10.5 3.8 3.8L16 6.5" />
+                  </svg>
                 ) : question.type === 'multi' ? (
-                  '+'
+                  <svg viewBox="0 0 20 20" focusable="false">
+                    <path d="M10 4v12M4 10h12" />
+                  </svg>
                 ) : (
-                  '→'
+                  <svg viewBox="0 0 20 20" focusable="false">
+                    <path d="M3.5 10h12M10.5 5l5 5-5 5" />
+                  </svg>
                 )}
               </span>
             </button>

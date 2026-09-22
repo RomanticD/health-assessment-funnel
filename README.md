@@ -52,6 +52,8 @@ Landing
 
 前端不在 Web Storage 保存健康答案或 bearer credential。刷新和跨设备 CLI 恢复以服务端状态为准；写请求使用 ETag/`If-Match` 防止静默覆盖，并用 `Idempotency-Key` 安全重放。
 
+题目地址只表达导航状态（例如 `/quiz/ageYears`、`/quiz/review`）；结果路径中的 assessment UUID 也不是授权凭证。复制到没有原 HttpOnly Cookie 的浏览器不会读取结果。完整验收入口、截图、测试位置和交付证据见 [delivery/README.md](./delivery/README.md)。
+
 ## 技术栈与工程边界
 
 - Next.js 16 App Router、React 19、TypeScript strict、Zod 4

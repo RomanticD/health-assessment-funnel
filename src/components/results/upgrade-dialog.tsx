@@ -103,10 +103,11 @@ export function UpgradeDialog({
             <path d="M9.5 12V8.75a4.5 4.5 0 0 1 9 0V12M7 12h14v11H7z" />
           </svg>
         </div>
-        <p className="eyebrow">Your personal summary</p>
-        <h2 id="upgrade-title">Make room for your next chapter.</h2>
+        <p className="eyebrow">DEMO CHECKOUT · $0</p>
+        <h2 id="upgrade-title">Unlock the complete picture.</h2>
         <p id="upgrade-description">
-          Bring your daily energy guide and estimated progress together in one personal overview.
+          Your free preview is ready. Unlock the rest of your personal profile for this session — no
+          payment is collected in this demo.
         </p>
 
         <ul className="unlock-list">
